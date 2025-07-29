@@ -1,3 +1,4 @@
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -228,5 +229,23 @@ export const toggleLike = async (postId, userId) => {
     }
   } else {
     throw new Error("Post not found");
+  }
+};
+
+export const saveContactMessage = async (formData, user) => {
+  if (!user) throw new Error('User must be authenticated to send a message.');
+
+  try {
+    await addDoc(collection(db, 'contactSubmissions'), {
+      ...formData,
+      senderId: user.uid,
+      senderName: user.displayName,
+      senderEmail: user.email,
+      status: 'new',
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error saving contact message:', error);
+    throw error;
   }
 };
