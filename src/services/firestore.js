@@ -86,3 +86,33 @@ export const getPdfs = async () => {
     return [];
   }
 };
+
+export const saveReview = async (reviewData, user) => {
+  if (!user) throw new Error('User must be authenticated to leave a review.');
+
+  try {
+    await addDoc(collection(db, 'reviews'), {
+      ...reviewData,
+      reviewerId: user.uid,
+      reviewerName: user.displayName,
+      reviewerEmail: user.email,
+      reviewerPhotoURL: user.photoURL,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error saving review:', error);
+    throw error;
+  }
+};
+
+export const getReviews = async () => {
+  try {
+    const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const reviews = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return reviews;
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    return [];
+  }
+};

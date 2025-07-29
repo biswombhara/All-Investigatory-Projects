@@ -38,6 +38,7 @@ const navLinks = [
   { href: '/pdfs', label: 'PDFs' },
   { href: '/request-pdf', label: 'Request a PDF' },
   { href: '/upload-pdf', label: 'Upload a PDF' },
+  { href: '/reviews', label: 'Reviews' },
 ];
 
 export function Header() {
