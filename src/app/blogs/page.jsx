@@ -1,15 +1,16 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { getBlogPosts } from '../../services/firestore.js';
 import { Loader } from '../../components/Loader.jsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../../components/ui/card.jsx';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar.jsx';
 import { Button } from '../../components/ui/button.jsx';
 import Link from 'next/link';
-import { MessageSquare, ThumbsUp, Calendar } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Calendar, Edit } from 'lucide-react';
 import { format } from 'date-fns';
+import { AuthContext } from '../../context/AuthContext.jsx';
 
 function BlogPostCard({ post }) {
   const getInitials = (name) => {
@@ -64,6 +65,7 @@ function BlogPostCard({ post }) {
 export default function BlogsPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -93,6 +95,16 @@ export default function BlogsPage() {
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
           Insights, stories, and updates from our community members.
         </p>
+        {user && (
+            <div className="mt-6">
+                <Button asChild>
+                    <Link href="/create-post">
+                        <Edit className="mr-2 h-4 w-4" />
+                        Create New Post
+                    </Link>
+                </Button>
+            </div>
+        )}
       </div>
       
       {posts.length > 0 ? (
@@ -104,7 +116,7 @@ export default function BlogsPage() {
       ) : (
         <div className="text-center text-muted-foreground py-16">
           <p className="text-xl">No blog posts yet.</p>
-          <p className="mt-2">Why not be the first to create one?</p>
+          <p className="mt-2">Be the first to create one!</p>
         </div>
       )}
     </div>

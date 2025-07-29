@@ -98,12 +98,6 @@ export function Header() {
         <div className="hidden items-center gap-4 md:flex">
           {user ? (
             <>
-              <NavLink href="/create-post">
-                 <Button variant="ghost">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Create Post
-                 </Button>
-              </NavLink>
               <Button onClick={handleLogout} variant="outline">
                 Logout
                 <LogOut className="ml-2 h-4 w-4" />
