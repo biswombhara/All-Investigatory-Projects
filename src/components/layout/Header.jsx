@@ -144,13 +144,6 @@ export function Header() {
                       </span>
                     </NavLink>
                   ))}
-                   {user && (
-                     <NavLink href="/create-post" onClick={() => setMenuOpen(false)}>
-                       <span className="text-xl font-medium text-muted-foreground transition-colors hover:text-primary">
-                        Create Post
-                       </span>
-                    </NavLink>
-                   )}
                 </nav>
                 <div className="mt-auto">
                    {user ? (

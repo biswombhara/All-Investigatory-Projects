@@ -88,15 +88,14 @@ export default function ConnectPage() {
     <div className="container mx-auto px-4 py-16 sm:py-24">
       <div className="text-center">
         <h1 className="font-headline text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-          Connect With Us
+          Contact Us
         </h1>
         <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground">
-          We'd love to hear from you! Whether you have a question, a suggestion, or just want to say hello, here are the best ways to reach out and get involved.
+          We'd love to hear from you! Whether you have a question, a suggestion, or just want to say hello, please fill out the form below.
         </p>
       </div>
 
         <div className="mt-16 max-w-4xl mx-auto">
-            <h2 className="font-headline text-3xl font-bold text-center">Contact Us Directly</h2>
              <Card className="w-full mt-8 shadow-xl">
               <CardHeader>
                 <CardTitle className="font-headline text-2xl flex items-center gap-2">
@@ -175,38 +174,6 @@ export default function ConnectPage() {
               </CardContent>
             </Card>
         </div>
-
-      <div className="mt-20 max-w-4xl mx-auto">
-        <h2 className="font-headline text-3xl font-bold text-center">Follow Us</h2>
-        <div className="mt-8 p-8 border rounded-lg bg-secondary/50">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
-            <div>
-              <h3 className="font-headline text-xl font-semibold text-foreground">Social Media</h3>
-              <p className="mt-2 text-muted-foreground">Follow us on our social channels to stay updated with the latest content and announcements.</p>
-              <div className="mt-4 flex justify-center md:justify-start items-center gap-5">
-                <a href="https://www.youtube.com/@Allinvestigatoryprojects" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                  <Youtube className="h-6 w-6" />
-                  <span>YouTube</span>
-                </a>
-                <a href="https://t.me/allinvestigatoryprojects" aria-label="Telegram" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                  <Send className="h-6 w-6" />
-                  <span>Telegram</span>
-                </a>
-              </div>
-            </div>
-             <div>
-              <h3 className="font-headline text-xl font-semibold text-foreground">Direct Email</h3>
-              <p className="mt-2 text-muted-foreground">For direct inquiries, feel free to send us an email. We'll get back to you as soon as possible.</p>
-               <div className="mt-4 flex justify-center md:justify-start">
-                  <a href="mailto:allinvestigatoryprojects@gmail.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                    <Mail className="h-6 w-6" />
-                    <span>allinvestigatoryprojects@gmail.com</span>
-                  </a>
-               </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
       {error && (
         <AlertDialog open={!!error} onOpenChange={() => setError(null)}>
