@@ -119,6 +119,24 @@ export const getReviews = async () => {
   }
 };
 
+export const saveContactSubmission = async (formData, user) => {
+  if (!user) throw new Error('User must be authenticated to submit a contact form.');
+
+  try {
+    await addDoc(collection(db, 'contactSubmissions'), {
+      ...formData,
+      senderId: user.uid,
+      senderName: user.displayName,
+      senderEmail: user.email,
+      status: 'new',
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error saving contact submission:', error);
+    throw error;
+  }
+};
+
 // --- Blog Functions ---
 
 export const createBlogPost = async (postData, user) => {
