@@ -10,13 +10,17 @@ import { AuthContext } from '../../context/AuthContext.jsx';
 import { signOutUser } from '../../services/auth.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.jsx';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
+import { usePathname } from 'next/navigation.js';
 
 const NavLink = ({ href, children, onClick }) => {
   const { showLoader } = useContext(LoadingContext);
+  const pathname = usePathname();
 
   const handleClick = (e) => {
-    // We can add a check here to not show loader if it's an external link or a hash link
-    showLoader();
+    // Only show loader if navigating to a different page
+    if (pathname !== href) {
+      showLoader();
+    }
     if (onClick) {
       onClick(e);
     }

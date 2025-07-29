@@ -1,18 +1,44 @@
+'use client';
+
 import { HeroSection } from '../components/HeroSection.jsx';
 import { PdfList } from '../components/PdfList.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { getPdfs } from '../services/firestore.js';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useToast } from '../hooks/use-toast.js';
+import { Skeleton } from '../components/ui/skeleton.jsx';
 
-export const metadata = {
-  title: 'All Investigatory Projects - Home',
-  description: 'Welcome to All Investigatory Projects. Your ultimate resource for educational materials. Access and download PDFs on various subjects with ease, all curated from our YouTube channel.',
-};
+export default function Home() {
+  const [pdfs, setPdfs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
 
-export default async function Home() {
-  const allPdfs = await getPdfs();
-  const featuredPdfs = allPdfs.slice(0, 3);
+  useEffect(() => {
+    const fetchPdfs = async () => {
+      setLoading(true);
+      const fetchedPdfs = await getPdfs();
+      setPdfs(fetchedPdfs);
+      setLoading(false);
+    };
+
+    fetchPdfs();
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('upload_success') === 'true') {
+      toast({
+        title: 'Upload Successful!',
+        description: 'Your document has been added to the library.',
+        variant: 'success',
+      });
+    }
+  }, [searchParams, toast]);
+
+  const featuredPdfs = pdfs.slice(0, 3);
 
   return (
     <div className="flex flex-col">
@@ -27,8 +53,16 @@ export default async function Home() {
               Explore some of the most popular documents uploaded by our community.
             </p>
           </div>
-          <PdfList pdfs={featuredPdfs} />
-          {allPdfs.length > 3 && (
+          {loading ? (
+             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <Skeleton className="h-48 w-full rounded-xl" />
+                <Skeleton className="h-48 w-full rounded-xl" />
+                <Skeleton className="h-48 w-full rounded-xl" />
+            </div>
+          ) : (
+            <PdfList pdfs={featuredPdfs} />
+          )}
+          {pdfs.length > 3 && (
             <div className="mt-12 text-center md:mt-16">
               <Button asChild size="lg" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
                 <Link href="/pdfs">

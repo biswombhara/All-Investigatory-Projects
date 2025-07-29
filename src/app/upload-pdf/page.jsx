@@ -36,8 +36,9 @@ import {
 } from '../../components/ui/alert-dialog.jsx';
 import { uploadPdfToGoogleDrive } from '../../services/storage.js'; 
 import { savePdfDocument } from '../../services/firestore.js'; 
-import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2, PartyPopper, ExternalLink, School, Youtube } from 'lucide-react';
-import { GoogleAuthProvider } from 'firebase/auth';
+import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '../../hooks/use-toast.js';
 
 
 const formSchema = z.object({
@@ -76,7 +77,7 @@ export default function UploadPdfPage() {
   const { user, accessToken, signIn } = useContext(AuthContext);
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [successInfo, setSuccessInfo] = useState(null);
+  const router = useRouter();
   
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -124,10 +125,7 @@ export default function UploadPdfPage() {
       
       await savePdfDocument(pdfData, user);
       
-      setSuccessInfo({
-        title: values.title,
-        url: driveFile.webViewLink,
-      });
+      router.push('/?upload_success=true');
 
     } catch (err) {
       console.error('Frontend (UploadPdfPage): Upload process caught error:', err);
@@ -153,11 +151,6 @@ export default function UploadPdfPage() {
        }
     }
   };
-
-  const closeSuccessDialog = () => {
-    setSuccessInfo(null);
-    form.reset();
-  }
 
   return (
     <>
@@ -324,32 +317,6 @@ export default function UploadPdfPage() {
             <AlertDialogFooter>
               <AlertDialogAction onClick={() => setError(null)}>
                 OK
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-      {successInfo && (
-        <AlertDialog open={!!successInfo} onOpenChange={closeSuccessDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <PartyPopper className="h-6 w-6 text-primary" />
-                Upload Successful!
-              </AlertDialogTitle>
-              <AlertDialogDescription className="pt-2">
-                Your document, "{successInfo.title}", has been successfully uploaded and is now available.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="sm:justify-start gap-2">
-               <Button asChild>
-                  <a href={successInfo.url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="mr-2" />
-                    View Document
-                  </a>
-              </Button>
-              <AlertDialogAction onClick={closeSuccessDialog}>
-                Done
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

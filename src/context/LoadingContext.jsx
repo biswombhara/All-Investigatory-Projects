@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 export const LoadingContext = createContext({
   loading: false,
@@ -10,25 +10,26 @@ export const LoadingContext = createContext({
 });
 
 export const LoadingProvider = ({ children }) => {
-  const [loading, setLoading] = useState(true); // Start with loader on for initial load
+  const [loading, setLoading] = useState(true); 
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Hide loader whenever the path changes
+    // Hide loader whenever the path or query params change
     setLoading(false);
-  }, [pathname]);
+  }, [pathname, searchParams]);
   
   useEffect(() => {
     // Initial load effect
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1500); // Or your preferred duration
+    }, 1500); 
 
     return () => clearTimeout(timer);
   }, []);
 
-  const showLoader = () => setLoading(true);
-  const hideLoader = () => setLoading(false);
+  const showLoader = useCallback(() => setLoading(true), []);
+  const hideLoader = useCallback(() => setLoading(false), []);
 
   return (
     <LoadingContext.Provider value={{ loading, showLoader, hideLoader }}>
