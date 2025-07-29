@@ -38,7 +38,6 @@ const navLinks = [
   { href: '/pdfs', label: 'PDFs' },
   { href: '/blogs', label: 'Blogs' },
   { href: '/reviews', label: 'Reviews' },
-  { href: '/connect', label: 'Connect' },
 ];
 
 export function Header() {
