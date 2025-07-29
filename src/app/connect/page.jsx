@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '../../components/ui/button.jsx';
-import { Mail, Send, Youtube, MessageSquare, Type, Loader2, ShieldCheck, LogIn, AlertCircle, FileQuestion, UploadCloud } from 'lucide-react';
+import { Mail, Send, MessageSquare, Type, Loader2, ShieldCheck, LogIn, AlertCircle, FileQuestion, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card.jsx';
 import { useForm } from 'react-hook-form';
