@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useState, useContext } from 'react';
 import { Button } from '../ui/button.jsx';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '../ui/sheet.jsx';
-import { Menu, LogOut, LogIn } from 'lucide-react';
+import { Menu, LogOut, LogIn, Edit } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { signOutUser } from '../../services/auth.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.jsx';
@@ -36,6 +36,7 @@ const NavLink = ({ href, children, onClick }) => {
 
 const navLinks = [
   { href: '/pdfs', label: 'PDFs' },
+  { href: '/blogs', label: 'Blog' },
   { href: '/request-pdf', label: 'Request a PDF' },
   { href: '/upload-pdf', label: 'Upload a PDF' },
   { href: '/reviews', label: 'Reviews' },
@@ -97,6 +98,12 @@ export function Header() {
         <div className="hidden items-center gap-4 md:flex">
           {user ? (
             <>
+              <NavLink href="/create-post">
+                 <Button variant="ghost">
+                    <Edit className="mr-2 h-4 w-4" />
+                    Create Post
+                 </Button>
+              </NavLink>
               <Button onClick={handleLogout} variant="outline">
                 Logout
                 <LogOut className="ml-2 h-4 w-4" />
@@ -145,6 +152,13 @@ export function Header() {
                       </span>
                     </NavLink>
                   ))}
+                   {user && (
+                     <NavLink href="/create-post" onClick={() => setMenuOpen(false)}>
+                       <span className="text-xl font-medium text-muted-foreground transition-colors hover:text-primary">
+                        Create Post
+                       </span>
+                    </NavLink>
+                   )}
                 </nav>
                 <div className="mt-auto">
                    {user ? (
