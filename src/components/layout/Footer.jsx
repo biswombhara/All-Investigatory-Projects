@@ -26,7 +26,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="font-headline text-lg font-semibold text-foreground">Connect With Us</h3>
+             <h3 className="font-headline text-lg font-semibold text-foreground">Follow Us</h3>
             <div className="mt-2 flex justify-center md:justify-start items-center gap-5">
                 <a href="https://www.youtube.com/@Allinvestigatoryprojects" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
                   <Youtube className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
@@ -35,9 +35,6 @@ export function Footer() {
                   <Send className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
                 </a>
               </div>
-               <p className="mt-4 text-sm text-muted-foreground">
-                Mail us at <a href="mailto:allinvestigatoryprojects@gmail.com" className="hover:text-primary transition-colors">allinvestigatoryprojects@gmail.com</a>
-              </p>
                <p className="mt-4 text-sm text-muted-foreground">
                 Proudly created with Biswombhara Patra
               </p>
