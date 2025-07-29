@@ -31,13 +31,13 @@ export function Footer() {
                 <a href="https://www.youtube.com/@Allinvestigatoryprojects" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
                   <Youtube className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
                 </a>
-                <a href="mailto:example@example.com" aria-label="Email">
-                  <Mail className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
-                </a>
-                <a href="#" aria-label="Telegram">
+                <a href="https://t.me/allinvestigatoryprojects" aria-label="Telegram">
                   <Send className="h-6 w-6 text-muted-foreground transition-colors hover:text-primary" />
                 </a>
               </div>
+               <p className="mt-4 text-sm text-muted-foreground">
+                Mail us at <a href="mailto:allinvestigatoryprojects@gmail.com" className="hover:text-primary transition-colors">allinvestigatoryprojects@gmail.com</a>
+              </p>
                <p className="mt-4 text-sm text-muted-foreground">
                 Proudly created with Biswombhara Patra
               </p>
