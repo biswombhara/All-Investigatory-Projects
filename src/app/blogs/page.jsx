@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar.jsx';
 import { Button } from '../../components/ui/button.jsx';
 import Link from 'next/link';
-import { MessageSquare, ThumbsUp, Calendar, Edit } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Calendar, Edit, LogIn } from 'lucide-react';
 import { format } from 'date-fns';
 import { AuthContext } from '../../context/AuthContext.jsx';
 
@@ -65,7 +65,7 @@ function BlogPostCard({ post }) {
 export default function BlogsPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useContext(AuthContext);
+  const { user, signIn } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -95,16 +95,23 @@ export default function BlogsPage() {
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
           Insights, stories, and updates from our community members.
         </p>
-        {user && (
-            <div className="mt-6">
-                <Button asChild>
+        <div className="mt-6">
+            {user ? (
+                 <Button asChild>
                     <Link href="/create-post">
                         <Edit className="mr-2 h-4 w-4" />
                         Create New Post
                     </Link>
                 </Button>
-            </div>
-        )}
+            ) : (
+                 <Card className="max-w-md mx-auto p-4 bg-secondary border-dashed">
+                    <p className="text-muted-foreground mb-3">Want to share your own story?</p>
+                    <Button onClick={() => signIn()}>
+                        <LogIn className="mr-2 h-4 w-4" /> Login to Create a Post
+                    </Button>
+                </Card>
+            )}
+        </div>
       </div>
       
       {posts.length > 0 ? (
@@ -116,7 +123,7 @@ export default function BlogsPage() {
       ) : (
         <div className="text-center text-muted-foreground py-16">
           <p className="text-xl">No blog posts yet.</p>
-          <p className="mt-2">Be the first to create one!</p>
+           {user && <p className="mt-2">Be the first to create one!</p>}
         </div>
       )}
     </div>
