@@ -26,9 +26,6 @@ export function HeroSection() {
               <Button asChild size="lg" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
                 <Link href="/pdfs">Browse PDFs</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
-                <Link href="/request-pdf">Request a PDF</Link>
-              </Button>
             </div>
           </motion.div>
           <motion.div
