@@ -36,7 +36,7 @@ import {
 } from '../../components/ui/alert-dialog.jsx';
 import { uploadPdfToGoogleDrive } from '../../services/storage.js'; 
 import { savePdfDocument } from '../../services/firestore.js'; 
-import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2, School } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '../../hooks/use-toast.js';
 
