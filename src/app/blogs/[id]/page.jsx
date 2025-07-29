@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../../../components/ui/avat
 import { Button } from '../../../components/ui/button.jsx';
 import { Textarea } from '../../../components/ui/textarea.jsx';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card.jsx';
-import { ThumbsUp, MessageSquare, Send, LogIn } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Send, LogIn, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../../../hooks/use-toast.js';
 
