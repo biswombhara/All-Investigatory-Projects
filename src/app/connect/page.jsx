@@ -16,12 +16,10 @@ import {
 } from '../../components/ui/form.jsx';
 import { Input } from '../../components/ui/input.jsx';
 import { Textarea } from '../../components/ui/textarea.jsx';
-import { FileQuestion, UploadCloud, Send, MessageSquare, ShieldCheck, LogIn, Loader2, AlertCircle } from 'lucide-react';
-import Link from 'next/link';
+import { FileQuestion, Send, MessageSquare, LogIn, Loader2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card.jsx';
 import { useToast } from '../../hooks/use-toast.js';
 import { AuthContext } from '../../context/AuthContext.jsx';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert.jsx';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -101,43 +99,8 @@ export default function ConnectPage() {
             Connect With Us
           </h1>
           <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground">
-            Help our community grow by requesting or uploading new educational materials, or send us a message directly.
+            Have a question or a message for us? Fill out the form below.
           </p>
-        </div>
-
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
-            <Card className="text-center shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader>
-                    <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
-                        <FileQuestion className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="font-headline mt-4">Request a PDF</CardTitle>
-                    <CardDescription>
-                    Can't find a document? Let us know what you're looking for and we might create it for you.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Button asChild size="lg">
-                    <Link href="/request-pdf">Make a Request</Link>
-                    </Button>
-                </CardContent>
-            </Card>
-            <Card className="text-center shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader>
-                    <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
-                    <UploadCloud className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="font-headline mt-4">Upload a PDF</CardTitle>
-                    <CardDescription>
-                    Have an investigatory project or notes to share? Upload them and help other students.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Button asChild size="lg">
-                    <Link href="/upload-pdf">Share Your Document</Link>
-                    </Button>
-                </CardContent>
-            </Card>
         </div>
 
         <div className="mt-16 w-full max-w-3xl mx-auto">
