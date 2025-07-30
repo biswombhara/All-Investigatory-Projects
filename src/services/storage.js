@@ -1,3 +1,4 @@
+
 // services/storage.js
 
 export async function uploadPdfToGoogleDrive(file, title, accessToken) {
@@ -74,5 +75,82 @@ export async function uploadPdfToGoogleDrive(file, title, accessToken) {
   } catch (error) {
     // Re-throw or wrap the error to be caught by the calling component
     throw new Error(`Google Drive upload process failed: ${error.message}`);
+  }
+}
+
+export async function uploadImageToGoogleDrive(file, title, accessToken) {
+  if (!file) {
+    throw new Error('No file selected for upload.');
+  }
+   const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+    throw new Error('Only JPG, PNG, and WebP images are allowed.');
+  }
+  if (!accessToken) {
+    throw new Error('Google Drive authentication token is missing.');
+  }
+
+  try {
+    const metadata = {
+      name: `${title}_${Date.now()}.${file.name.split('.').pop()}`,
+      mimeType: file.type,
+    };
+
+    const createResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,webViewLink,webContentLink', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: JSON.stringify(metadata),
+    });
+
+    if (!createResponse.ok) {
+      const errorData = await createResponse.json();
+      throw new Error(`Failed to create file metadata in Google Drive: ${errorData.error.message}`);
+    }
+
+    const location = createResponse.headers.get('Location');
+
+    const uploadResponse = await fetch(location, {
+      method: 'PUT',
+      headers: {
+        'Content-Range': `bytes 0-${file.size - 1}/${file.size}`,
+      },
+      body: file,
+    });
+
+    if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(`Failed to upload file to Google Drive: ${errorData.error.message}`);
+    }
+
+    const result = await uploadResponse.json();
+    
+    await fetch(`https://www.googleapis.com/drive/v3/files/${result.id}/permissions`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        role: 'reader',
+        type: 'anyone',
+      }),
+    });
+    
+    // The webContentLink is better for direct image embedding
+    const fileDetails = await fetch(`https://www.googleapis.com/drive/v3/files/${result.id}?fields=webContentLink,webViewLink`, {
+         headers: {
+            'Authorization': `Bearer ${accessToken}`,
+         }
+    });
+    
+    const finalResult = await fileDetails.json();
+
+    return { ...result, webViewLink: finalResult.webContentLink || finalResult.webViewLink };
+
+  } catch (error) {
+    throw new Error(`Google Drive image upload failed: ${error.message}`);
   }
 }

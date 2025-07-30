@@ -2,17 +2,19 @@
 'use client';
 
 import { useState, useEffect, useContext } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { getBlogPost, addComment, getComments, toggleLike } from '../../../services/firestore.js';
+import { useParams, useRouter, notFound } from 'next/navigation';
+import { getBlogPost, addComment, getComments, toggleLike, getPostWithRealtimeUpdates } from '../../../services/firestore.js';
 import { AuthContext } from '../../../context/AuthContext.jsx';
 import { Loader } from '../../../components/Loader.jsx';
 import { Avatar, AvatarFallback, AvatarImage } from '../../../components/ui/avatar.jsx';
 import { Button } from '../../../components/ui/button.jsx';
 import { Textarea } from '../../../components/ui/textarea.jsx';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card.jsx';
-import { ThumbsUp, MessageSquare, Send, LogIn, Loader2 } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Send, LogIn, Loader2, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../../../hooks/use-toast.js';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const getInitials = (name) => {
   if (!name) return '';
@@ -51,26 +53,20 @@ export default function BlogPostPage() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Real-time listener for post updates (likes)
+  // Real-time listener for post updates (likes and content)
   useEffect(() => {
     if (!postId) return;
-    const fetchPost = async () => {
-        try {
-            const fetchedPost = await getBlogPost(postId);
-            if (!fetchedPost) {
-                router.push('/404');
-            } else {
-                setPost(fetchedPost);
-            }
-        } catch (error) {
-            console.error("Failed to fetch post:", error);
-            router.push('/404');
-        } finally {
+    const unsubscribe = getPostWithRealtimeUpdates(postId, (data) => {
+        if (data) {
+            setPost(data);
             setLoading(false);
+        } else {
+            notFound();
         }
-    };
-    fetchPost();
-  }, [postId, router]);
+    });
+
+    return () => unsubscribe();
+  }, [postId]);
 
   // Real-time listener for comments
   useEffect(() => {
@@ -108,11 +104,6 @@ export default function BlogPostPage() {
     }
     try {
         await toggleLike(postId, user.uid);
-        // Optimistically update the UI, or wait for the snapshot listener
-        const newLikes = post.likes.includes(user.uid) 
-            ? post.likes.filter(uid => uid !== user.uid)
-            : [...post.likes, user.uid];
-        setPost({ ...post, likes: newLikes });
     } catch (error) {
         toast({ title: "Failed to update like.", description: error.message, variant: "destructive" });
     }
@@ -122,7 +113,8 @@ export default function BlogPostPage() {
   if (!post) return null;
 
   const formattedDate = post.createdAt?.toDate ? format(post.createdAt.toDate(), 'PPP') : 'Date not available';
-  const hasLiked = user && post.likes.includes(user.uid);
+  const hasLiked = user && post.likes && post.likes.includes(user.uid);
+  const isOwner = user && user.uid === post.authorId;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12 sm:py-16">
@@ -131,27 +123,49 @@ export default function BlogPostPage() {
           <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             {post.title}
           </h1>
-          <div className="mt-6 flex items-center gap-4">
-            <Avatar>
-              <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
-              <AvatarFallback>{getInitials(post.authorName)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold text-foreground">{post.authorName}</p>
-              <p className="text-sm text-muted-foreground">{formattedDate}</p>
+          <div className="mt-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar>
+                <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
+                <AvatarFallback>{getInitials(post.authorName)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold text-foreground">{post.authorName}</p>
+                <p className="text-sm text-muted-foreground">{formattedDate}</p>
+              </div>
             </div>
+            {isOwner && (
+                <Button asChild variant="outline">
+                    <Link href={`/edit-post/${postId}`}>
+                        <Edit className="mr-2 h-4 w-4"/> Edit Post
+                    </Link>
+                </Button>
+            )}
           </div>
         </header>
+        
+        {post.imageUrl && (
+            <div className="my-8 relative aspect-video w-full overflow-hidden rounded-lg shadow-lg">
+                 <Image 
+                    src={post.imageUrl}
+                    alt={post.title}
+                    layout="fill"
+                    objectFit="cover"
+                    priority
+                 />
+            </div>
+        )}
 
-        <div className="prose prose-lg max-w-none text-foreground/90">
-            {post.body}
-        </div>
+        <div 
+            className="prose prose-lg max-w-none text-foreground/90 whitespace-pre-wrap"
+            dangerouslySetInnerHTML={{ __html: post.body }}
+        />
       </article>
 
       <div className="mt-12 flex items-center gap-6 border-t border-b py-4">
         <Button variant={hasLiked ? "default" : "outline"} onClick={handleLike} className="flex items-center gap-2">
             <ThumbsUp className={`h-5 w-5 ${hasLiked ? '' : 'text-primary'}`} />
-            <span>{post.likes.length} Like{post.likes.length !== 1 && 's'}</span>
+            <span>{post.likes?.length || 0} Like{post.likes?.length !== 1 && 's'}</span>
         </Button>
         <div className="flex items-center gap-2 text-muted-foreground">
             <MessageSquare className="h-5 w-5" />

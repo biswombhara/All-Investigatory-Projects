@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,11 +19,14 @@ import { Input } from '../../components/ui/input.jsx';
 import { Textarea } from '../../components/ui/textarea.jsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card.jsx';
 import { useToast } from '../../hooks/use-toast.js';
-import { Send, FileText, Type, ShieldCheck, LogIn, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, FileText, Type, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext.jsx';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert.jsx';
 import { useRouter } from 'next/navigation';
 import { createBlogPost } from '../../services/firestore.js';
+import { uploadImageToGoogleDrive } from '../../services/storage.js';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const formSchema = z.object({
   title: z.string().min(10, {
@@ -33,11 +37,19 @@ const formSchema = z.object({
   body: z.string().min(100, {
     message: 'Body must be at least 100 characters.',
   }),
+  image: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported."
+    ),
 });
 
 export default function CreatePostPage() {
   const { toast } = useToast();
-  const { user, loading: authLoading, signIn } = useContext(AuthContext);
+  const { user, accessToken, loading: authLoading, signIn } = useContext(AuthContext);
   const router = useRouter();
 
   const form = useForm({
@@ -45,6 +57,7 @@ export default function CreatePostPage() {
     defaultValues: {
       title: '',
       body: '',
+      image: undefined,
     },
   });
 
@@ -53,9 +66,10 @@ export default function CreatePostPage() {
   // Redirect if not logged in after auth state is determined
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/');
+      toast({ title: "Please log in to create a post.", variant: "destructive"});
+      router.push('/blogs');
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, toast]);
 
   async function onSubmit(values) {
     if (!user) {
@@ -66,9 +80,31 @@ export default function CreatePostPage() {
       });
       return;
     }
+    
+    if (!accessToken) {
+       toast({
+        title: 'Authentication Error',
+        description: 'Could not get Google authentication. Please try logging out and back in.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     try {
-      const postId = await createBlogPost(values, user);
+      let imageUrl = null;
+      if (values.image) {
+        const driveFile = await uploadImageToGoogleDrive(values.image, values.title, accessToken);
+        // We need to construct a direct viewable link from the webViewLink
+        imageUrl = driveFile.webViewLink.replace("/view?usp=drivesdk", "");
+      }
+
+      const postData = {
+          title: values.title,
+          body: values.body,
+          imageUrl,
+      };
+
+      const postId = await createBlogPost(postData, user);
       toast({
         title: 'Post Created!',
         description: 'Your blog post has been successfully published.',
@@ -77,7 +113,7 @@ export default function CreatePostPage() {
     } catch (err) {
        toast({
         title: 'Creation Failed',
-        description: 'Something went wrong. Please try again.',
+        description: err.message || 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
     }
@@ -131,6 +167,30 @@ export default function CreatePostPage() {
                   />
                   <FormField
                     control={form.control}
+                    name="image"
+                    render={({ field: { onChange, value, ...rest } }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <ImageIcon className="h-4 w-4" /> Featured Image (Optional)
+                        </FormLabel>
+                        <FormControl>
+                           <Input 
+                              type="file" 
+                              accept="image/png, image/jpeg, image/webp"
+                              onChange={(e) => onChange(e.target.files?.[0])}
+                              {...rest}
+                              className="file:text-primary"
+                            />
+                        </FormControl>
+                        <FormDescription>
+                          Add an image to appear at the top of your post (max 5MB).
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="body"
                     render={({ field }) => (
                       <FormItem>
@@ -139,7 +199,7 @@ export default function CreatePostPage() {
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Write your post content here. Markdown is supported."
+                            placeholder="Write your post content here..."
                             rows={15}
                             {...field}
                           />

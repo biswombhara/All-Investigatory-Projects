@@ -146,10 +146,12 @@ export const createBlogPost = async (postData, user) => {
     const postRef = await addDoc(collection(db, 'posts'), {
       title: postData.title,
       body: postData.body,
+      imageUrl: postData.imageUrl || null,
       authorId: user.uid,
       authorName: user.displayName,
       authorPhotoURL: user.photoURL,
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
       likes: [],
       commentCount: 0,
     });
@@ -159,6 +161,30 @@ export const createBlogPost = async (postData, user) => {
     throw error;
   }
 };
+
+export const updateBlogPost = async (postId, postData, userId) => {
+  if (!userId) throw new Error('User must be authenticated to update a post.');
+  
+  const postRef = doc(db, 'posts', postId);
+  const postSnap = await getDoc(postRef);
+
+  if (!postSnap.exists() || postSnap.data().authorId !== userId) {
+      throw new Error("Post not found or you don't have permission to edit it.");
+  }
+
+  try {
+    await updateDoc(postRef, {
+      title: postData.title,
+      body: postData.body,
+      imageUrl: postData.imageUrl, // This could be null if no new image is uploaded
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error updating blog post:", error);
+    throw error;
+  }
+};
+
 
 export const getBlogPosts = async () => {
   try {
@@ -186,6 +212,19 @@ export const getBlogPost = async (postId) => {
     console.error("Error fetching post:", error);
     throw error;
   }
+};
+
+export const getPostWithRealtimeUpdates = (postId, callback) => {
+    const postRef = doc(db, 'posts', postId);
+    return onSnapshot(postRef, (doc) => {
+        if (doc.exists()) {
+            callback({ id: doc.id, ...doc.data() });
+        } else {
+            callback(null);
+        }
+    }, (error) => {
+        console.error("Error fetching post in real-time:", error);
+    });
 };
 
 export const addComment = async (postId, commentText, user) => {
@@ -235,7 +274,8 @@ export const toggleLike = async (postId, userId) => {
 
   if (postSnap.exists()) {
     const postData = postSnap.data();
-    if (postData.likes.includes(userId)) {
+    const likes = postData.likes || [];
+    if (likes.includes(userId)) {
       // User has already liked, so unlike
       await updateDoc(postRef, {
         likes: arrayRemove(userId)
