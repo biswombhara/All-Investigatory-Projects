@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import {
   Card,
   CardContent,
@@ -26,11 +26,15 @@ import {
   AlertDialogTrigger,
 } from '../ui/alert-dialog.jsx';
 import { useToast } from '../../hooks/use-toast.js';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
+
 
 export function ReviewsTab() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { showLoader, hideLoader } = useContext(LoadingContext);
+
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -44,6 +48,7 @@ export function ReviewsTab() {
   }, []);
 
   const handleDelete = async (reviewId) => {
+    showLoader();
      try {
       await deleteReview(reviewId);
       toast({ title: 'Review Deleted', description: 'The review has been removed.' });
@@ -51,6 +56,8 @@ export function ReviewsTab() {
     } catch (error) {
       console.error("Failed to delete review", error);
       toast({ title: 'Error', description: 'Failed to delete the review.', variant: 'destructive' });
+    } finally {
+      hideLoader();
     }
   };
 

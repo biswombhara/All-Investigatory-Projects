@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog.jsx';
 import { saveContactSubmission } from '../../services/firestore.js';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
 
 const formSchema = z.object({
   topic: z.string().min(5, {
@@ -45,6 +46,7 @@ export default function ConnectPage() {
     const { toast } = useToast();
     const { user, signIn } = useContext(AuthContext);
     const [error, setError] = useState(null);
+    const { showLoader, hideLoader } = useContext(LoadingContext);
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -64,6 +66,8 @@ export default function ConnectPage() {
         });
         return;
         }
+        
+        showLoader();
 
         try {
             await saveContactSubmission(values, user);
@@ -78,16 +82,21 @@ export default function ConnectPage() {
                 title: 'Submission Failed',
                 message: 'Something went wrong. Please try again.',
             });
+        } finally {
+          hideLoader();
         }
     }
   
     const handleLogin = async () => {
+        showLoader();
         try {
             await signIn();
         } catch (error) {
             if (error.code !== 'auth/popup-closed-by-user') {
                 console.error('Login failed:', error);
             }
+        } finally {
+            hideLoader();
         }
     };
 

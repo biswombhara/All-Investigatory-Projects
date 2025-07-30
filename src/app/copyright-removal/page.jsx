@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,6 +33,8 @@ import {
 } from '../../components/ui/alert-dialog.jsx';
 import { signInWithGoogle } from '../../services/auth.js';
 import { saveCopyrightRemovalRequest } from '../../services/firestore.js';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
+
 
 const formSchema = z.object({
   url: z.string().url({ message: 'Please enter a valid URL.' }),
@@ -42,8 +45,9 @@ const formSchema = z.object({
 
 export default function CopyrightRemovalPage() {
   const { toast } = useToast();
-  const { user } = useContext(AuthContext);
+  const { user, signIn } = useContext(AuthContext);
   const [error, setError] = useState(null);
+  const { showLoader, hideLoader } = useContext(LoadingContext);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -63,6 +67,8 @@ export default function CopyrightRemovalPage() {
       });
       return;
     }
+    
+    showLoader();
 
     try {
       await saveCopyrightRemovalRequest(values, user);
@@ -77,16 +83,21 @@ export default function CopyrightRemovalPage() {
         title: 'Submission Failed',
         message: 'Something went wrong. Please try again.',
       });
+    } finally {
+      hideLoader();
     }
   }
   
   const handleLogin = async () => {
+    showLoader();
     try {
-      await signInWithGoogle();
+      await signIn();
     } catch (error) {
        if (error.code !== 'auth/popup-closed-by-user') {
         console.error('Login failed:', error);
       }
+    } finally {
+      hideLoader();
     }
   };
 

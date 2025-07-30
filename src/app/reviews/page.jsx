@@ -29,11 +29,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../../components/ui/alert-dialog.jsx';
-import { signInWithGoogle } from '../../services/auth.js';
 import { saveReview, getReviews } from '../../services/firestore.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar.jsx';
-import { Badge } from '../../components/ui/badge.jsx';
 import { Skeleton } from '../../components/ui/skeleton.jsx';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
 
 const formSchema = z.object({
   rating: z.number().min(1, 'Please select a rating').max(5),
@@ -60,10 +59,11 @@ const StarRatingInput = ({ value, onChange }) => {
 
 export default function ReviewsPage() {
   const { toast } = useToast();
-  const { user } = useContext(AuthContext);
+  const { user, signIn } = useContext(AuthContext);
   const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const { showLoader, hideLoader } = useContext(LoadingContext);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -93,6 +93,8 @@ export default function ReviewsPage() {
       });
       return;
     }
+    
+    showLoader();
 
     try {
       await saveReview(values, user);
@@ -110,16 +112,21 @@ export default function ReviewsPage() {
         title: 'Submission Failed',
         message: 'Something went wrong. Please try again.',
       });
+    } finally {
+      hideLoader();
     }
   }
 
   const handleLogin = async () => {
+    showLoader();
     try {
-      await signInWithGoogle();
+      await signIn();
     } catch (error) {
       if (error.code !== 'auth/popup-closed-by-user') {
         console.error('Login failed:', error);
       }
+    } finally {
+      hideLoader();
     }
   };
   

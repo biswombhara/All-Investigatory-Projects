@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import {
   Card,
   CardContent,
@@ -19,10 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select.jsx';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
 
 export function PdfRequestsTab() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { showLoader, hideLoader } = useContext(LoadingContext);
+
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -36,12 +39,15 @@ export function PdfRequestsTab() {
   }, []);
 
   const handleStatusChange = async (requestId, newStatus) => {
+    showLoader();
     try {
       await updateRequestStatus(requestId, newStatus);
       // Refresh the list to show the updated status
       fetchRequests();
     } catch (error) {
       console.error('Failed to update status:', error);
+    } finally {
+      hideLoader();
     }
   };
 

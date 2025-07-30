@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import {
   Card,
   CardContent,
@@ -34,12 +34,14 @@ import {
   AlertDialogTrigger,
 } from '../ui/alert-dialog.jsx';
 import { useToast } from '../../hooks/use-toast.js';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
 
 
 export function DocumentsTab() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { showLoader, hideLoader } = useContext(LoadingContext);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -53,6 +55,7 @@ export function DocumentsTab() {
   }, []);
 
   const handleStatusUpdate = async (pdfId, status) => {
+    showLoader();
     try {
       await updatePdfStatus(pdfId, status);
       toast({ title: 'Status Updated', description: `Document has been ${status}.` });
@@ -60,10 +63,13 @@ export function DocumentsTab() {
     } catch (error) {
       console.error("Failed to update PDF status", error);
        toast({ title: 'Error', description: 'Failed to update status.', variant: 'destructive' });
+    } finally {
+      hideLoader();
     }
   };
 
   const handleDelete = async (pdfId) => {
+    showLoader();
     try {
       await deletePdf(pdfId);
       toast({ title: 'Document Deleted', description: 'The document has been removed.' });
@@ -71,6 +77,8 @@ export function DocumentsTab() {
     } catch (error) {
       console.error("Failed to delete document", error);
       toast({ title: 'Error', description: 'Failed to delete the document.', variant: 'destructive' });
+    } finally {
+      hideLoader();
     }
   }
 

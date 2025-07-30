@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -46,8 +47,10 @@ const navLinks = [
 export function Header() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const { user, signIn } = useContext(AuthContext);
+  const { showLoader, hideLoader } = useContext(LoadingContext);
 
   const handleLogin = async () => {
+    showLoader();
     try {
       // Use the signIn method from context to ensure token is captured
       await signIn();
@@ -55,14 +58,19 @@ export function Header() {
       if (error.code !== 'auth/popup-closed-by-user') {
         console.error('Login failed:', error);
       }
+    } finally {
+      hideLoader();
     }
   };
 
   const handleLogout = async () => {
+    showLoader();
     try {
       await signOutUser();
     } catch (error) {
       console.error('Logout failed:', error);
+    } finally {
+      hideLoader();
     }
   };
   

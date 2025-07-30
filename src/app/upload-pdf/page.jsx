@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useContext, useState, useEffect } from 'react';
@@ -38,7 +39,7 @@ import { uploadPdfToGoogleDrive } from '../../services/storage.js';
 import { savePdfDocument } from '../../services/firestore.js'; 
 import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2, School } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '../../hooks/use-toast.js';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
 
 
 const formSchema = z.object({
@@ -78,6 +79,7 @@ export default function UploadPdfPage() {
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
+  const { showLoader, hideLoader } = useContext(LoadingContext);
   
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -107,6 +109,7 @@ export default function UploadPdfPage() {
     }
 
     setIsUploading(true);
+    showLoader();
     setError(null);
 
     try {
@@ -135,10 +138,12 @@ export default function UploadPdfPage() {
       });
     } finally {
       setIsUploading(false);
+      hideLoader();
     }
   }
 
   const handleLogin = async () => {
+    showLoader();
     try {
       await signIn();
     } catch (error) {
@@ -149,6 +154,8 @@ export default function UploadPdfPage() {
            message: error.message || 'Could not log in with Google.',
          });
        }
+    } finally {
+      hideLoader();
     }
   };
 
