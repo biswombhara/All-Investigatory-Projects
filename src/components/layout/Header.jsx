@@ -5,12 +5,15 @@ import Image from 'next/image';
 import { useState, useContext } from 'react';
 import { Button } from '../ui/button.jsx';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '../ui/sheet.jsx';
-import { Menu, LogOut, LogIn, Edit } from 'lucide-react';
+import { Menu, LogOut, LogIn, Edit, Shield } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { signOutUser } from '../../services/auth.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.jsx';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
 import { usePathname } from 'next/navigation.js';
+
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
 
 const NavLink = ({ href, children, onClick }) => {
   const { showLoader } = useContext(LoadingContext);
@@ -69,6 +72,8 @@ export function Header() {
     return names.map((n) => n[0]).join('');
   };
 
+  const isAdmin = user && user.email === ADMIN_EMAIL;
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -91,6 +96,13 @@ export function Header() {
               </span>
             </NavLink>
           ))}
+           {isAdmin && (
+             <NavLink href="/admin">
+                <span className="flex items-center gap-1 text-lg font-medium text-destructive transition-colors hover:text-primary">
+                  <Shield size={20} /> Admin
+                </span>
+             </NavLink>
+           )}
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
@@ -144,6 +156,13 @@ export function Header() {
                       </span>
                     </NavLink>
                   ))}
+                  {isAdmin && (
+                    <NavLink href="/admin" onClick={() => setMenuOpen(false)}>
+                        <span className="flex items-center gap-1 text-xl font-medium text-destructive transition-colors hover:text-primary">
+                          <Shield size={20} /> Admin
+                        </span>
+                    </NavLink>
+                  )}
                 </nav>
                 <div className="mt-auto">
                    {user ? (

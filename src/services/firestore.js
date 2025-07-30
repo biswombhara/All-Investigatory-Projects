@@ -136,3 +136,37 @@ export const saveContactSubmission = async (formData, user) => {
     throw error;
   }
 };
+
+
+// Admin-specific functions
+
+export const getAllPdfRequests = async () => {
+  try {
+    const q = query(collection(db, 'pdfRequests'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching all PDF requests:", error);
+    return [];
+  }
+};
+
+export const updateRequestStatus = async (requestId, status) => {
+  try {
+    const requestRef = doc(db, 'pdfRequests', requestId);
+    await updateDoc(requestRef, { status });
+  } catch (error) {
+    console.error('Error updating request status:', error);
+    throw error;
+  }
+};
+
+export const updatePdfStatus = async (pdfId, status) => {
+    try {
+        const pdfRef = doc(db, 'pdfs', pdfId);
+        await updateDoc(pdfRef, { status });
+    } catch (error) {
+        console.error('Error updating PDF status:', error);
+        throw error;
+    }
+}
