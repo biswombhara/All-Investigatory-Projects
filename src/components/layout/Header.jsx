@@ -172,25 +172,25 @@ export function Header() {
                     </NavLink>
                   )}
                 </nav>
-                <div className="mt-auto">
+                <div className="mt-auto flex flex-col gap-4 border-t pt-6">
                    {user ? (
-                     <div className="flex flex-col gap-4">
-                        <div className="flex items-center justify-center gap-2 rounded-lg bg-muted p-4">
+                     <>
+                        <div className="flex items-center gap-2">
                            <Avatar>
                             <AvatarImage src={user.photoURL} alt={user.displayName} />
                             <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
                           </Avatar>
                           <span className="font-medium">{user.displayName}</span>
                         </div>
-                        <Button onClick={() => { handleLogout(); setMenuOpen(false); }} className="w-full">
+                        <Button onClick={() => { handleLogout(); setMenuOpen(false); }} className="w-full justify-start text-xl font-medium h-auto p-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-primary">
+                          <LogOut className="mr-2 h-5 w-5" />
                           Logout
-                          <LogOut className="ml-2 h-4 w-4" />
                         </Button>
-                      </div>
+                      </>
                     ) : (
-                      <Button onClick={() => { handleLogin(); setMenuOpen(false); }} className="w-full">
+                      <Button onClick={() => { handleLogin(); setMenuOpen(false); }} className="w-full justify-start text-xl font-medium h-auto p-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-primary">
+                        <LogIn className="mr-2 h-5 w-5" />
                         Login with Google
-                        <LogIn className="ml-2 h-4 w-4" />
                       </Button>
                     )}
                 </div>
