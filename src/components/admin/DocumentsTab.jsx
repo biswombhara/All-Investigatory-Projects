@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '../ui/card.jsx';
 import { Skeleton } from '../ui/skeleton.jsx';
-import { getPdfs, updatePdfStatus } from '../../services/firestore.js';
+import { getPdfs, updatePdfStatus, deletePdf } from '../../services/firestore.js';
 import {
   Table,
   TableBody,
@@ -20,12 +20,26 @@ import {
   TableRow,
 } from '../ui/table.jsx';
 import { Button } from '../ui/button.jsx';
-import { Check, X, ExternalLink } from 'lucide-react';
+import { Check, X, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import { Badge } from '../ui/badge.jsx';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog.jsx';
+import { useToast } from '../../hooks/use-toast.js';
+
 
 export function DocumentsTab() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -41,11 +55,24 @@ export function DocumentsTab() {
   const handleStatusUpdate = async (pdfId, status) => {
     try {
       await updatePdfStatus(pdfId, status);
+      toast({ title: 'Status Updated', description: `Document has been ${status}.` });
       fetchDocuments(); // Refresh list
     } catch (error) {
       console.error("Failed to update PDF status", error);
+       toast({ title: 'Error', description: 'Failed to update status.', variant: 'destructive' });
     }
   };
+
+  const handleDelete = async (pdfId) => {
+    try {
+      await deletePdf(pdfId);
+      toast({ title: 'Document Deleted', description: 'The document has been removed.' });
+      fetchDocuments(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to delete document", error);
+      toast({ title: 'Error', description: 'Failed to delete the document.', variant: 'destructive' });
+    }
+  }
 
 
   return (
@@ -110,6 +137,29 @@ export function DocumentsTab() {
                       >
                         <X className="h-4 w-4 text-red-500" />
                       </Button>
+                       <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                           <Button variant="ghost" size="icon">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2">
+                              <AlertTriangle /> Are you sure?
+                              </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the document record from the database.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(doc.id)} className="bg-destructive hover:bg-destructive/90">
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))

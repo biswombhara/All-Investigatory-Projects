@@ -10,23 +10,49 @@ import {
   CardTitle,
 } from '../ui/card.jsx';
 import { Skeleton } from '../ui/skeleton.jsx';
-import { getReviews } from '../../services/firestore.js';
+import { getReviews, deleteReview } from '../../services/firestore.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.jsx';
-import { Star } from 'lucide-react';
+import { Star, Trash2, AlertTriangle } from 'lucide-react';
+import { Button } from '../ui/button.jsx';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog.jsx';
+import { useToast } from '../../hooks/use-toast.js';
 
 export function ReviewsTab() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchReviews = async () => {
+    setLoading(true);
+    const fetchedReviews = await getReviews();
+    setReviews(fetchedReviews);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      setLoading(true);
-      const fetchedReviews = await getReviews();
-      setReviews(fetchedReviews);
-      setLoading(false);
-    };
     fetchReviews();
   }, []);
+
+  const handleDelete = async (reviewId) => {
+     try {
+      await deleteReview(reviewId);
+      toast({ title: 'Review Deleted', description: 'The review has been removed.' });
+      fetchReviews(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to delete review", error);
+      toast({ title: 'Error', description: 'Failed to delete the review.', variant: 'destructive' });
+    }
+  };
 
   const getInitials = (name) => {
     if (!name) return '';
@@ -51,7 +77,7 @@ export function ReviewsTab() {
           </>
         ) : reviews.length > 0 ? (
           reviews.map((review) => (
-            <div key={review.id} className="rounded-lg border p-4">
+            <div key={review.id} className="rounded-lg border p-4 relative group">
                <div className="flex items-start gap-4">
                   <Avatar>
                       <AvatarImage src={review.reviewerPhotoURL} alt={review.reviewerName} />
@@ -71,6 +97,31 @@ export function ReviewsTab() {
                       </div>
                       <p className="mt-2 text-muted-foreground">{review.comment}</p>
                   </div>
+              </div>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2">
+                        <AlertTriangle /> Are you sure?
+                        </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete this review.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(review.id)} className="bg-destructive hover:bg-destructive/90">
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))

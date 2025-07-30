@@ -1,6 +1,7 @@
 
 
-import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot } from 'firebase/firestore';
+
+import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
 export const saveUser = async (user) => {
@@ -170,3 +171,23 @@ export const updatePdfStatus = async (pdfId, status) => {
         throw error;
     }
 }
+
+export const deletePdf = async (pdfId) => {
+  try {
+    const pdfRef = doc(db, 'pdfs', pdfId);
+    await deleteDoc(pdfRef);
+  } catch (error) {
+    console.error('Error deleting PDF from Firestore:', error);
+    throw error;
+  }
+};
+
+export const deleteReview = async (reviewId) => {
+  try {
+    const reviewRef = doc(db, 'reviews', reviewId);
+    await deleteDoc(reviewRef);
+  } catch (error) {
+    console.error('Error deleting review from Firestore:', error);
+    throw error;
+  }
+};
