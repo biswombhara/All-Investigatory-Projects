@@ -2,8 +2,12 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
 
 export const saveUser = async (user) => {
   if (!user) return;
@@ -66,11 +70,15 @@ export const saveCopyrightRemovalRequest = async (requestData, user) => {
 export const savePdfDocument = async (pdfData, user) => {
   if (!user) throw new Error('User must be authenticated to upload a document.');
 
+  const isAdmin = user.email === ADMIN_EMAIL;
+  const authorName = isAdmin ? 'Admin' : user.displayName;
+
+
   try {
     await addDoc(collection(db, 'pdfs'), {
       ...pdfData,
       authorId: user.uid,
-      authorName: user.displayName,
+      authorName: authorName,
       createdAt: serverTimestamp(),
     });
   } catch (error) {
