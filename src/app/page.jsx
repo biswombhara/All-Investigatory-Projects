@@ -7,6 +7,7 @@ import { ArrowRight, FileQuestion, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card.jsx';
 import { CategoryCard } from '../components/CategoryCard.jsx';
+import { FaqSection } from '../components/FaqSection.jsx';
 
 
 const categories = [
@@ -97,6 +98,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <FaqSection />
     </div>
   );
 }
