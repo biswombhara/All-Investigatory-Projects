@@ -4,6 +4,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -188,6 +189,48 @@ export const deleteReview = async (reviewId) => {
     await deleteDoc(reviewRef);
   } catch (error) {
     console.error('Error deleting review from Firestore:', error);
+    throw error;
+  }
+};
+
+export const getAllCopyrightRequests = async () => {
+  try {
+    const q = query(collection(db, 'copyrightRequests'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching all copyright requests:", error);
+    return [];
+  }
+};
+
+export const updateCopyrightRequestStatus = async (requestId, status) => {
+  try {
+    const requestRef = doc(db, 'copyrightRequests', requestId);
+    await updateDoc(requestRef, { status });
+  } catch (error) {
+    console.error('Error updating copyright request status:', error);
+    throw error;
+  }
+};
+
+export const getAllContactSubmissions = async () => {
+  try {
+    const q = query(collection(db, 'contactSubmissions'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching all contact submissions:", error);
+    return [];
+  }
+};
+
+export const updateContactSubmissionStatus = async (submissionId, status) => {
+  try {
+    const submissionRef = doc(db, 'contactSubmissions', submissionId);
+    await updateDoc(submissionRef, { status });
+  } catch (error) {
+    console.error('Error updating contact submission status:', error);
     throw error;
   }
 };
