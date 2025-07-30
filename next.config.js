@@ -25,7 +25,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'www.vecteezy.com',
+        hostname: 'static.vecteezy.com',
         port: '',
         pathname: '/**',
       }
