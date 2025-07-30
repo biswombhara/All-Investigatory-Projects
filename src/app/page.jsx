@@ -11,7 +11,7 @@ import { FaqSection } from '../components/FaqSection.jsx';
 
 
 const categories = [
-  { name: 'Mathematics', imageUrl: 'https://static.vecteezy.com/system/resources/thumbnails/021/826/876/small_2x/hand-drawn-math-symbols-icon-in-flat-style-mathematics-formula-illustration-on-isolated-background-school-education-sign-business-concept-vector.jpg', hint: 'mathematics equation' },
+  { name: 'Mathematics', imageUrl: 'https://placehold.co/600x400.png', hint: 'mathematics equation' },
   { name: 'Physics', imageUrl: 'https://placehold.co/600x400.png', hint: 'physics atoms' },
   { name: 'Chemistry', imageUrl: 'https://placehold.co/600x400.png', hint: 'chemistry beakers' },
   { name: 'Biology', imageUrl: 'https://placehold.co/600x400.png', hint: 'biology dna' },
