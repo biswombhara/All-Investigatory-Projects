@@ -7,7 +7,7 @@ import Image from 'next/image';
 export function CategoryCard({ category }) {
   return (
     <Link href={`/pdfs?subject=${encodeURIComponent(category.name)}`}>
-      <div className="group relative block h-64 overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
+      <div className="group relative block h-48 overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
         <Image
           src={category.imageUrl}
           alt={category.name}
