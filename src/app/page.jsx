@@ -11,7 +11,7 @@ import { FaqSection } from '../components/FaqSection.jsx';
 
 
 const categories = [
-  { name: 'Mathematics', imageUrl: 'https://placehold.co/600x400.png', hint: 'mathematics equation' },
+  { name: 'Mathematics', imageUrl: 'https://cdn.pixabay.com/photo/2020/09/23/11/34/background-5594879_960_720.jpg', hint: 'mathematics equation' },
   { name: 'Physics', imageUrl: 'https://placehold.co/600x400.png', hint: 'physics atoms' },
   { name: 'Chemistry', imageUrl: 'https://placehold.co/600x400.png', hint: 'chemistry beakers' },
   { name: 'Biology', imageUrl: 'https://placehold.co/600x400.png', hint: 'biology dna' },
