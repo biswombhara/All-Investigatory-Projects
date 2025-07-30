@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { PdfList } from '../../components/PdfList.jsx';
 import { Input } from '../../components/ui/input.jsx';
-import { Button } from '../../components/ui/button.jsx';
 import { getPdfs } from '../../services/firestore.js';
-import { Search, School } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Loader } from '../../components/Loader.jsx';
 import {
   Select,
@@ -14,16 +13,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select.jsx';
+import { useSearchParams } from 'next/navigation.js';
+
+
+const allSubjectsList = [
+  'All',
+  'Mathematics',
+  'Physics',
+  'Chemistry',
+  'Biology',
+  'English',
+  'Science',
+  'Physical Education',
+  'Economics',
+  'Computer science',
+];
+
+const allClassesList = [
+    'All',
+    '9th',
+    '10th',
+    '11th',
+    '12th',
+    'College ( Any UG & PG )',
+    'School ( 4th - 8th )',
+];
+
 
 export default function PdfsPage() {
   const [pdfs, setPdfs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('All');
+  
+  const initialSubject = searchParams.get('subject') || 'All';
+  const [selectedSubject, setSelectedSubject] = useState(initialSubject);
   const [selectedClass, setSelectedClass] = useState('All');
-
-  const [allSubjects, setAllSubjects] = useState(['All']);
-  const [allClasses, setAllClasses] = useState(['All']);
 
   useEffect(() => {
     const fetchPdfs = async () => {
@@ -31,10 +56,6 @@ export default function PdfsPage() {
       try {
         const fetchedPdfs = await getPdfs();
         setPdfs(fetchedPdfs);
-        const subjects = ['All', ...new Set(fetchedPdfs.map((pdf) => pdf.subject).filter(Boolean))];
-        const classes = ['All', ...new Set(fetchedPdfs.map((pdf) => pdf.class).filter(Boolean))];
-        setAllSubjects(subjects);
-        setAllClasses(classes);
       } catch (error) {
         console.error("Failed to fetch PDFs:", error);
       } finally {
@@ -89,7 +110,7 @@ export default function PdfsPage() {
               <SelectValue placeholder="Filter by subject" />
             </SelectTrigger>
             <SelectContent>
-              {allSubjects.map((subject) => (
+              {allSubjectsList.map((subject) => (
                 <SelectItem key={subject} value={subject}>
                   {subject}
                 </SelectItem>
@@ -101,7 +122,7 @@ export default function PdfsPage() {
                <SelectValue placeholder="Filter by class" />
             </SelectTrigger>
             <SelectContent>
-              {allClasses.map((c) => (
+              {allClassesList.map((c) => (
                 <SelectItem key={c} value={c}>
                   {c}
                 </SelectItem>
