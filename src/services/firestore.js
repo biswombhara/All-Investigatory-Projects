@@ -1,6 +1,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -161,16 +162,6 @@ export const updateRequestStatus = async (requestId, status) => {
     throw error;
   }
 };
-
-export const updatePdfStatus = async (pdfId, status) => {
-    try {
-        const pdfRef = doc(db, 'pdfs', pdfId);
-        await updateDoc(pdfRef, { status });
-    } catch (error) {
-        console.error('Error updating PDF status:', error);
-        throw error;
-    }
-}
 
 export const deletePdf = async (pdfId) => {
   try {

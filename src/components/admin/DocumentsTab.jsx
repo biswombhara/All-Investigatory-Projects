@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '../ui/card.jsx';
 import { Skeleton } from '../ui/skeleton.jsx';
-import { getPdfs, updatePdfStatus, deletePdf } from '../../services/firestore.js';
+import { getPdfs, deletePdf } from '../../services/firestore.js';
 import {
   Table,
   TableBody,
@@ -20,8 +20,7 @@ import {
   TableRow,
 } from '../ui/table.jsx';
 import { Button } from '../ui/button.jsx';
-import { Check, X, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
-import { Badge } from '../ui/badge.jsx';
+import { ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,20 +53,6 @@ export function DocumentsTab() {
     fetchDocuments();
   }, []);
 
-  const handleStatusUpdate = async (pdfId, status) => {
-    showLoader();
-    try {
-      await updatePdfStatus(pdfId, status);
-      toast({ title: 'Status Updated', description: `Document has been ${status}.` });
-      fetchDocuments(); // Refresh list
-    } catch (error) {
-      console.error("Failed to update PDF status", error);
-       toast({ title: 'Error', description: 'Failed to update status.', variant: 'destructive' });
-    } finally {
-      hideLoader();
-    }
-  };
-
   const handleDelete = async (pdfId) => {
     showLoader();
     try {
@@ -88,7 +73,7 @@ export function DocumentsTab() {
       <CardHeader>
         <CardTitle>Manage Documents</CardTitle>
         <CardDescription>
-          Approve, reject, or view uploaded documents.
+          Review and delete uploaded documents.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -101,7 +86,7 @@ export function DocumentsTab() {
                 <TableHead>Title</TableHead>
                 <TableHead>Subject</TableHead>
                 <TableHead>Uploaded By</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Uploaded At</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -113,17 +98,7 @@ export function DocumentsTab() {
                     <TableCell>{doc.subject}</TableCell>
                     <TableCell>{doc.authorName}</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          doc.status === 'approved'
-                            ? 'default'
-                            : doc.status === 'rejected'
-                            ? 'destructive'
-                            : 'secondary'
-                        }
-                      >
-                        {doc.status || 'pending'}
-                      </Badge>
+                      {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleString() : 'N/A'}
                     </TableCell>
                     <TableCell className="text-right">
                        <a href={doc.url} target="_blank" rel="noopener noreferrer">
@@ -131,20 +106,6 @@ export function DocumentsTab() {
                             <ExternalLink className="h-4 w-4" />
                           </Button>
                        </a>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleStatusUpdate(doc.id, 'approved')}
-                      >
-                        <Check className="h-4 w-4 text-green-500" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleStatusUpdate(doc.id, 'rejected')}
-                      >
-                        <X className="h-4 w-4 text-red-500" />
-                      </Button>
                        <AlertDialog>
                         <AlertDialogTrigger asChild>
                            <Button variant="ghost" size="icon">
