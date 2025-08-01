@@ -182,13 +182,13 @@ export function Header() {
                           </Avatar>
                           <span className="font-medium">{user.displayName}</span>
                         </div>
-                        <Button onClick={() => { handleLogout(); setMenuOpen(false); }} className="w-full justify-start text-xl font-medium h-auto p-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-primary">
+                        <Button onClick={() => { handleLogout(); setMenuOpen(false); }} variant="outline" className="w-full justify-center">
                           <LogOut className="mr-2 h-5 w-5" />
                           Logout
                         </Button>
                       </>
                     ) : (
-                      <Button onClick={() => { handleLogin(); setMenuOpen(false); }} className="w-full justify-start text-xl font-medium h-auto p-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-primary">
+                      <Button onClick={() => { handleLogin(); setMenuOpen(false); }} className="w-full justify-center">
                         <LogIn className="mr-2 h-5 w-5" />
                         Login with Google
                       </Button>
