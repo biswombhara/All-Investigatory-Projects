@@ -141,7 +141,7 @@ export function Header() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] flex flex-col">
               <SheetHeader>
                  <NavLink href="/" onClick={() => setMenuOpen(false)}>
                   <SheetTitle className="flex items-center gap-2 border-b pb-6">
@@ -151,49 +151,47 @@ export function Header() {
                  </NavLink>
                 <SheetDescription className="sr-only">A list of navigation links and user authentication options.</SheetDescription>
               </SheetHeader>
-              <div className="flex h-full flex-col">
-                <nav className="mt-8 flex flex-col gap-6">
-                  {navLinks.map((link) => (
-                    <NavLink
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="text-xl font-medium text-muted-foreground transition-colors hover:text-primary">
-                        {link.label}
+              <nav className="mt-8 flex flex-col gap-6">
+                {navLinks.map((link) => (
+                  <NavLink
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <span className="text-xl font-medium text-muted-foreground transition-colors hover:text-primary">
+                      {link.label}
+                    </span>
+                  </NavLink>
+                ))}
+                {isAdmin && (
+                  <NavLink href="/admin" onClick={() => setMenuOpen(false)}>
+                      <span className="flex items-center gap-1 text-xl font-medium text-destructive transition-colors hover:text-primary">
+                        <Shield size={20} /> Admin
                       </span>
-                    </NavLink>
-                  ))}
-                  {isAdmin && (
-                    <NavLink href="/admin" onClick={() => setMenuOpen(false)}>
-                        <span className="flex items-center gap-1 text-xl font-medium text-destructive transition-colors hover:text-primary">
-                          <Shield size={20} /> Admin
-                        </span>
-                    </NavLink>
-                  )}
-                </nav>
-                <div className="mt-auto flex flex-col gap-4 border-t pt-6">
-                   {user ? (
-                     <>
-                        <div className="flex items-center gap-2">
-                           <Avatar>
-                            <AvatarImage src={user.photoURL} alt={user.displayName} />
-                            <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{user.displayName}</span>
-                        </div>
-                        <Button onClick={() => { handleLogout(); setMenuOpen(false); }} variant="outline" className="w-full justify-center">
-                          <LogOut className="mr-2 h-5 w-5" />
-                          Logout
-                        </Button>
-                      </>
-                    ) : (
-                      <Button onClick={() => { handleLogin(); setMenuOpen(false); }} className="w-full justify-center">
-                        <LogIn className="mr-2 h-5 w-5" />
-                        Login with Google
+                  </NavLink>
+                )}
+              </nav>
+              <div className="mt-auto flex flex-col gap-4 border-t pt-6">
+                 {user ? (
+                   <>
+                      <div className="flex items-center gap-2">
+                         <Avatar>
+                          <AvatarImage src={user.photoURL} alt={user.displayName} />
+                          <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{user.displayName}</span>
+                      </div>
+                      <Button onClick={() => { handleLogout(); setMenuOpen(false); }} variant="outline" className="w-full justify-center">
+                        <LogOut className="mr-2 h-5 w-5" />
+                        Logout
                       </Button>
-                    )}
-                </div>
+                    </>
+                  ) : (
+                    <Button onClick={() => { handleLogin(); setMenuOpen(false); }} className="w-full justify-center">
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Login with Google
+                    </Button>
+                  )}
               </div>
             </SheetContent>
           </Sheet>
