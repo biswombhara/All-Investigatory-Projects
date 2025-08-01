@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { PdfList } from '../../components/PdfList.jsx';
 import { Input } from '../../components/ui/input.jsx';
 import { getPdfs } from '../../services/firestore.js';
-import { Search } from 'lucide-react';
+import { Search, ListFilter } from 'lucide-react';
 import { Loader } from '../../components/Loader.jsx';
 import {
   Select,
@@ -39,6 +40,8 @@ const allClassesList = [
     'School ( 4th - 8th )',
 ];
 
+const sortOptions = ['Latest uploaded', 'A-Z'];
+
 
 export default function PdfsPage() {
   const [pdfs, setPdfs] = useState([]);
@@ -49,6 +52,7 @@ export default function PdfsPage() {
   const initialSubject = searchParams.get('subject') || 'All';
   const [selectedSubject, setSelectedSubject] = useState(initialSubject);
   const [selectedClass, setSelectedClass] = useState('All');
+  const [sortOption, setSortOption] = useState(sortOptions[0]);
 
   useEffect(() => {
     const fetchPdfs = async () => {
@@ -66,16 +70,24 @@ export default function PdfsPage() {
     fetchPdfs();
   }, []);
 
-  const filteredPdfs = pdfs.filter((pdf) => {
-    const matchesSubject =
-      selectedSubject === 'All' || pdf.subject === selectedSubject;
-    const matchesClass =
-      selectedClass === 'All' || pdf.class === selectedClass;
-    const matchesSearch = pdf.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchesSubject && matchesClass && matchesSearch;
-  });
+  const sortedAndFilteredPdfs = pdfs
+    .filter((pdf) => {
+      const matchesSubject =
+        selectedSubject === 'All' || pdf.subject === selectedSubject;
+      const matchesClass =
+        selectedClass === 'All' || pdf.class === selectedClass;
+      const matchesSearch = pdf.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      return matchesSubject && matchesClass && matchesSearch;
+    })
+    .sort((a, b) => {
+      if (sortOption === 'A-Z') {
+        return a.title.localeCompare(b.title);
+      }
+      // 'Latest uploaded' is default, and data is pre-sorted by date from Firestore
+      return 0;
+    });
 
   if (loading) {
     return <Loader />;
@@ -105,8 +117,21 @@ export default function PdfsPage() {
           />
         </div>
         <div className="flex flex-nowrap items-center justify-center gap-2">
+          <Select value={sortOption} onValueChange={setSortOption}>
+            <SelectTrigger className="w-full sm:w-auto">
+               <ListFilter className="h-4 w-4 mr-2" />
+               <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-            <SelectTrigger className="w-full sm:w-[180px] rounded-full">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Filter by subject" />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +143,7 @@ export default function PdfsPage() {
             </SelectContent>
           </Select>
           <Select value={selectedClass} onValueChange={setSelectedClass}>
-            <SelectTrigger className="w-full sm:w-[180px] rounded-full">
+            <SelectTrigger className="w-full sm:w-[180px]">
                <SelectValue placeholder="Filter by class" />
             </SelectTrigger>
             <SelectContent>
@@ -132,8 +157,8 @@ export default function PdfsPage() {
         </div>
       </div>
       
-      {filteredPdfs.length > 0 ? (
-        <PdfList pdfs={filteredPdfs} />
+      {sortedAndFilteredPdfs.length > 0 ? (
+        <PdfList pdfs={sortedAndFilteredPdfs} />
       ) : (
         <div className="text-center text-muted-foreground py-16">
           <p className="text-xl">No documents found.</p>
