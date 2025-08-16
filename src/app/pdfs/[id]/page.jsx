@@ -44,7 +44,9 @@ export default function PdfViewerPage({ params }) {
       }
     };
 
-    fetchPdf();
+    if (params.id) {
+        fetchPdf();
+    }
   }, [params.id, hideLoader]);
 
   if (loading) {
@@ -72,7 +74,7 @@ export default function PdfViewerPage({ params }) {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2">
                 <div className="mb-6 rounded-lg bg-background p-6 shadow-md">
-                <h1 className="mb-2 font-headline text-3xl font-bold">{pdf.title}</h1>
+                <h1 className="font-headline text-3xl font-bold">{pdf.title}</h1>
                 <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                     <User className="h-4 w-4" />
