@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   const title = 'All Investigatory Projects - Your Source for Educational PDFs';
   const description =
-    "Access and download investigatory project PDFs on various subjects, curated from our YouTube channel. Your ultimate resource for educational materials.";
+    "Access and download investigatory project PDFs on various subjects, curated from our YouTube channel by Biswombhara Patra. Your ultimate resource for educational materials.";
   const imageUrl =
     'https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj'; 
 
