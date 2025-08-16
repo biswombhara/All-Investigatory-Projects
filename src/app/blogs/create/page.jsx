@@ -9,6 +9,7 @@ import { Button } from '../../../components/ui/button.jsx';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -169,6 +170,9 @@ export default function CreateBlogPage() {
                           <FormControl>
                             <Input placeholder="https://example.com/image.png" {...field} />
                           </FormControl>
+                           <FormDescription>
+                            Please use a copyright-free image URL.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
