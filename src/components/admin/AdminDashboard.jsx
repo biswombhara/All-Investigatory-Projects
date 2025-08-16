@@ -8,14 +8,16 @@ import { ReviewsTab } from './ReviewsTab.jsx';
 import { DocumentsTab } from './DocumentsTab.jsx';
 import { CopyrightRequestsTab } from './CopyrightRequestsTab.jsx';
 import { ConnectSubmissionsTab } from './ConnectSubmissionsTab.jsx';
+import { BlogsTab } from './BlogsTab.jsx';
 
 export function AdminDashboard() {
   return (
     <Tabs defaultValue="requests" className="w-full">
-      <TabsList className="grid w-full grid-cols-5">
+      <TabsList className="grid w-full grid-cols-6">
         <TabsTrigger value="requests">PDF Requests</TabsTrigger>
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
+        <TabsTrigger value="blogs">Blogs</TabsTrigger>
         <TabsTrigger value="copyright">Copyright</TabsTrigger>
         <TabsTrigger value="connect">Connect</TabsTrigger>
       </TabsList>
@@ -27,6 +29,9 @@ export function AdminDashboard() {
       </TabsContent>
       <TabsContent value="documents">
         <DocumentsTab />
+      </TabsContent>
+      <TabsContent value="blogs">
+        <BlogsTab />
       </TabsContent>
       <TabsContent value="copyright">
         <CopyrightRequestsTab />

@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost } from '../../../services/firestore.js';
+import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment } from '../../../services/firestore.js';
 import { Loader } from '../../../components/Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit } from 'lucide-react';
@@ -15,8 +15,26 @@ import { Textarea } from '../../../components/ui/textarea.jsx';
 import { Avatar, AvatarFallback, AvatarImage } from '../../../components/ui/avatar.jsx';
 import Link from 'next/link';
 import MDEditor from '@uiw/react-md-editor';
+import { useToast } from '../../../hooks/use-toast.js';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../../../components/ui/alert-dialog.jsx';
 
-const Comment = ({ comment }) => {
+
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+
+const Comment = ({ comment, isAdmin, onDelete }) => {
+  const { toast } = useToast();
+  
   const getInitials = (name) => {
     if (!name) return '';
     const names = name.split(' ');
@@ -25,8 +43,13 @@ const Comment = ({ comment }) => {
   
   const commentDate = comment.createdAt?.toDate ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : 'Just now';
 
+  const handleDelete = () => {
+    onDelete(comment.id);
+    toast({ title: "Comment Deleted", description: "The comment has been removed." });
+  }
+
   return (
-    <div className="flex items-start gap-4">
+    <div className="flex items-start gap-4 group">
       <Avatar>
         <AvatarImage src={comment.authorPhotoURL} alt={comment.authorName} />
         <AvatarFallback>{getInitials(comment.authorName)}</AvatarFallback>
@@ -38,6 +61,27 @@ const Comment = ({ comment }) => {
         </div>
         <p className="mt-1 text-foreground/90">{comment.text}</p>
       </div>
+      {isAdmin && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action will permanently delete this comment.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };
@@ -55,6 +99,8 @@ export default function BlogPostPage() {
 
   const hasLiked = post?.likes?.includes(user?.uid);
   const isAuthor = post?.authorId === user?.uid;
+  const isAdmin = user && user.email === ADMIN_EMAIL;
+
 
   const fetchPostAndComments = async () => {
     const { slug } = params;
@@ -113,6 +159,17 @@ export default function BlogPostPage() {
         console.error("Failed to add comment", error);
     } finally {
         setIsSubmittingComment(false);
+    }
+  };
+
+  const handleCommentDelete = async (commentId) => {
+    if (!post) return;
+    try {
+      await deleteComment(post.id, commentId);
+      // Refresh comments list
+      setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
     }
   };
 
@@ -211,7 +268,7 @@ export default function BlogPostPage() {
 
         <div className="mt-8 space-y-6">
             {comments.length > 0 ? (
-                comments.map(comment => <Comment key={comment.id} comment={comment} />)
+                comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={handleCommentDelete} />)
             ) : (
                 <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
             )}

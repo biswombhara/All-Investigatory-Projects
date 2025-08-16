@@ -9,7 +9,8 @@
 
 
 
-import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
+
+import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -375,6 +376,27 @@ export const getBlogPostBySlug = async (slug) => {
   }
 };
 
+export const deleteBlogPost = async (postId) => {
+  try {
+    const postRef = doc(db, 'blogPosts', postId);
+    
+    // Also delete all comments in the subcollection
+    const commentsRef = collection(db, 'blogPosts', postId, 'comments');
+    const commentsSnapshot = await getDocs(commentsRef);
+    
+    const batch = writeBatch(db);
+    commentsSnapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+
+    await deleteDoc(postRef);
+  } catch (error) {
+    console.error('Error deleting blog post and its comments:', error);
+    throw error;
+  }
+};
+
 export const likeBlogPost = async (postId, userId) => {
   const postRef = doc(db, 'blogPosts', postId);
   try {
@@ -424,6 +446,30 @@ export const getCommentsForPost = async (postId) => {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error("Error fetching comments:", error);
+    return [];
+  }
+};
+
+
+export const deleteComment = async (postId, commentId) => {
+  try {
+    const commentRef = doc(db, 'blogPosts', postId, 'comments', commentId);
+    await deleteDoc(commentRef);
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    throw error;
+  }
+};
+
+export const getAllCommentsForPost = async (postId) => {
+  if (!postId) return [];
+  try {
+    const commentsRef = collection(db, 'blogPosts', postId, 'comments');
+    const q = query(commentsRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching all comments for post:", error);
     return [];
   }
 };
