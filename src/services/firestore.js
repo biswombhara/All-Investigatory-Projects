@@ -7,6 +7,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -314,9 +315,23 @@ export const saveBlogPost = async (postData, user) => {
       authorName: user.displayName,
       authorPhotoURL: user.photoURL,
       createdAt: serverTimestamp(),
+      likes: [], // Initialize likes as an empty array
     });
   } catch (error) {
     console.error('Error saving blog post:', error);
+    throw error;
+  }
+};
+
+export const updateBlogPost = async (postId, postData) => {
+  const postRef = doc(db, 'blogPosts', postId);
+  try {
+    await updateDoc(postRef, {
+      ...postData,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error updating blog post:', error);
     throw error;
   }
 };
@@ -339,10 +354,63 @@ export const getBlogPostBySlug = async (slug) => {
     if (querySnapshot.empty) {
       return null;
     }
-    const doc = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
+    const docSnap = querySnapshot.docs[0];
+    return { id: docSnap.id, ...docSnap.data() };
   } catch (error) {
     console.error("Error fetching blog post by slug:", error);
     throw error;
+  }
+};
+
+export const likeBlogPost = async (postId, userId) => {
+  const postRef = doc(db, 'blogPosts', postId);
+  try {
+    await updateDoc(postRef, {
+      likes: arrayUnion(userId),
+    });
+  } catch (error) {
+    console.error('Error liking post:', error);
+    throw error;
+  }
+};
+
+export const unlikeBlogPost = async (postId, userId) => {
+  const postRef = doc(db, 'blogPosts', postId);
+  try {
+    await updateDoc(postRef, {
+      likes: arrayRemove(userId),
+    });
+  } catch (error) {
+    console.error('Error unliking post:', error);
+    throw error;
+  }
+};
+
+export const addCommentToPost = async (postId, commentData, user) => {
+  if (!user) throw new Error('User must be authenticated to comment.');
+  const commentsCollectionRef = collection(db, 'blogPosts', postId, 'comments');
+  try {
+    await addDoc(commentsCollectionRef, {
+      ...commentData,
+      authorId: user.uid,
+      authorName: user.displayName,
+      authorPhotoURL: user.photoURL,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    throw error;
+  }
+};
+
+export const getCommentsForPost = async (postId) => {
+  const commentsCollectionRef = collection(db, 'blogPosts', postId, 'comments');
+  try {
+    const q = query(commentsCollectionRef, orderBy('createdAt', 'asc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
   }
 };
