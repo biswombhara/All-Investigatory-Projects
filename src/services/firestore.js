@@ -8,6 +8,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -35,6 +36,18 @@ export const saveUser = async (user) => {
     }
   }
 };
+
+export const updateUserInFirestore = async (userId, data) => {
+  if (!userId) return;
+  const userRef = doc(db, 'users', userId);
+  try {
+    await updateDoc(userRef, data);
+  } catch (error) {
+    console.error("Error updating user in Firestore: ", error);
+    throw error;
+  }
+};
+
 
 export const savePdfRequest = async (requestData, user) => {
   if (!user) throw new Error('User must be authenticated to make a request.');

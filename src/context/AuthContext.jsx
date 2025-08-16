@@ -3,6 +3,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signInWithGoogle } from '../services/auth.js';
 import { GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '@/lib/firebase.js';
 
 export const AuthContext = createContext();
 
@@ -33,6 +34,11 @@ export const AuthProvider = ({ children }) => {
        setAccessToken(result.accessToken);
     }
   };
+  
+  const reloadUser = async () => {
+    await auth.currentUser?.reload();
+    setUser(auth.currentUser);
+  }
 
 
   const value = {
@@ -40,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     accessToken,
     signIn, // Expose the new signIn function
+    reloadUser,
   };
 
 

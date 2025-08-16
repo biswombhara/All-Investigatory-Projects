@@ -1,6 +1,6 @@
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from 'firebase/auth';
 import { auth } from '../lib/firebase.js';
-import { saveUser } from './firestore.js';
+import { saveUser, updateUserInFirestore } from './firestore.js';
 
 const provider = new GoogleAuthProvider();
 // Add the Google Drive scope to request permission to create files.
@@ -45,4 +45,27 @@ export const signOutUser = () => {
 
 export const onAuthStateChanged = (callback) => {
   return auth.onAuthStateChanged(callback);
+};
+
+export const updateUserProfile = async (user, profileData) => {
+  if (!user) throw new Error("User not authenticated");
+
+  try {
+    // Update Firebase Auth profile
+    await updateProfile(user, {
+      displayName: profileData.displayName,
+    });
+
+    // Update user data in Firestore
+    await updateUserInFirestore(user.uid, {
+      displayName: profileData.displayName,
+    });
+    
+     // Important: Reload the user to get the updated profile information
+    await user.reload();
+
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw error;
+  }
 };

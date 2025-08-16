@@ -6,13 +6,21 @@ import Image from 'next/image';
 import { useState, useContext } from 'react';
 import { Button } from '../ui/button.jsx';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '../ui/sheet.jsx';
-import { Menu, LogOut, LogIn, Edit, Shield, Moon, Sun } from 'lucide-react';
+import { Menu, LogOut, LogIn, Edit, Shield, Moon, Sun, User } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { signOutUser } from '../../services/auth.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.jsx';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
 import { usePathname } from 'next/navigation.js';
 import { useTheme } from 'next-themes';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu.jsx';
 
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -121,16 +129,38 @@ export function Header() {
             <span className="sr-only">Toggle theme</span>
           </Button>
           {user ? (
-            <>
-              <Button onClick={handleLogout} variant="outline">
-                Logout
-                <LogOut className="ml-2 h-4 w-4" />
-              </Button>
-               <Avatar>
-                <AvatarImage src={user.photoURL} alt={user.displayName} />
-                <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
-              </Avatar>
-            </>
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar>
+                    <AvatarImage src={user.photoURL} alt={user.displayName} />
+                    <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.displayName}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                   <Link href="/profile">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button onClick={handleLogin}>
               Login with Google
@@ -187,13 +217,19 @@ export function Header() {
                   </div>
                  {user ? (
                    <>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-center gap-2">
                          <Avatar>
                           <AvatarImage src={user.photoURL} alt={user.displayName} />
                           <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
                         </Avatar>
                         <span className="font-medium">{user.displayName}</span>
                       </div>
+                      <NavLink href="/profile" onClick={() => setMenuOpen(false)}>
+                        <Button variant="outline" className="w-full justify-center">
+                            <User className="mr-2 h-5 w-5" />
+                            Profile
+                        </Button>
+                      </NavLink>
                       <Button onClick={() => { handleLogout(); setMenuOpen(false); }} variant="outline" className="w-full justify-center">
                         <LogOut className="mr-2 h-5 w-5" />
                         Logout
