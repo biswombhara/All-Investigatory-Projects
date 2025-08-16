@@ -169,13 +169,20 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     const postDate = post.createdAt?.toDate ? post.createdAt.toDate().toISOString() : new Date().toISOString();
     const modifiedDate = post.updatedAt?.toDate ? post.updatedAt.toDate().toISOString() : postDate;
 
+    // Combine title, author, and custom keywords
+    const fullKeywords = [
+      post.title,
+      post.authorName,
+      ...(post.keywords ? post.keywords.split(',').map(k => k.trim()) : [])
+    ].join(', ');
+
     return {
       '@context': 'https://schema.org',
       '@type': 'BlogPosting',
       headline: post.title,
       description: post.description.substring(0, 150),
       image: post.coverImage,
-      keywords: post.keywords,
+      keywords: fullKeywords,
       author: {
         '@type': 'Person',
         name: post.authorName || 'Anonymous',

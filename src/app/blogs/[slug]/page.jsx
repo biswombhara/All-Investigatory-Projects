@@ -14,10 +14,17 @@ export async function generateMetadata({ params }) {
   const postUrl = `${siteUrl}/blogs/${post.slug}`;
   const description = post.description.substring(0, 160);
 
+  // Combine title, author, and custom keywords for better SEO
+  const keywords = [
+    post.title,
+    post.authorName,
+    ...(post.keywords ? post.keywords.split(',').map(k => k.trim()) : [])
+  ].join(', ');
+
   return {
     title: `${post.title} | All Investigatory Projects`,
     description: description,
-    keywords: post.keywords,
+    keywords: keywords,
     openGraph: {
       title: post.title,
       description: description,
