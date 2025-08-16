@@ -19,7 +19,7 @@ import { Input } from '../../../components/ui/input.jsx';
 import { Textarea } from '../../../components/ui/textarea.jsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card.jsx';
 import { useToast } from '../../../hooks/use-toast.js';
-import { Send, Image as ImageIcon, Type, MessageSquare, LogIn, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Send, Image as ImageIcon, Type, MessageSquare, LogIn, Loader2, AlertCircle, ShieldCheck, Tags } from 'lucide-react';
 import { AuthContext } from '../../../context/AuthContext.jsx';
 import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert.jsx';
 import {
@@ -45,6 +45,7 @@ const formSchema = z.object({
   coverImage: z.string().url({
     message: 'Please enter a valid image URL.',
   }),
+  keywords: z.string().optional(),
 });
 
 const generateSlug = (title) => {
@@ -69,6 +70,7 @@ export default function CreateBlogPage() {
       title: '',
       description: '',
       coverImage: '',
+      keywords: '',
     },
   });
 
@@ -192,6 +194,27 @@ export default function CreateBlogPage() {
                               {...field}
                             />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="keywords"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Tags className="h-4 w-4" /> SEO Keywords
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="e.g., physics, quantum mechanics, class 12"
+                              {...field}
+                            />
+                          </FormControl>
+                           <FormDescription>
+                            Separate keywords with a comma.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}

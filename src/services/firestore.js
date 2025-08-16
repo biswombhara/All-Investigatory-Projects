@@ -12,6 +12,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -332,6 +333,7 @@ export const saveBlogPost = async (postData, user) => {
       authorPhotoURL: user.photoURL,
       createdAt: serverTimestamp(),
       likes: [], // Initialize likes as an empty array
+      keywords: postData.keywords || '',
     });
   } catch (error) {
     console.error('Error saving blog post:', error);
@@ -344,6 +346,7 @@ export const updateBlogPost = async (postId, postData) => {
   try {
     await updateDoc(postRef, {
       ...postData,
+      keywords: postData.keywords || '',
       updatedAt: serverTimestamp(),
     });
   } catch (error) {

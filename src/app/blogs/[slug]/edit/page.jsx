@@ -16,9 +16,10 @@ import {
   FormMessage,
 } from '../../../../components/ui/form.jsx';
 import { Input } from '../../../../components/ui/input.jsx';
+import { Textarea } from '../../../../components/ui/textarea.jsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../../components/ui/card.jsx';
 import { useToast } from '../../../../hooks/use-toast.js';
-import { Send, Image as ImageIcon, Type, MessageSquare, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, Image as ImageIcon, Type, MessageSquare, AlertCircle, Loader2, Tags } from 'lucide-react';
 import { AuthContext } from '../../../../context/AuthContext.jsx';
 import { Alert, AlertDescription, AlertTitle } from '../../../../components/ui/alert.jsx';
 import { getBlogPostBySlug, updateBlogPost } from '../../../../services/firestore.js';
@@ -38,6 +39,7 @@ const formSchema = z.object({
   coverImage: z.string().url({
     message: 'Please enter a valid image URL.',
   }),
+  keywords: z.string().optional(),
 });
 
 
@@ -56,6 +58,7 @@ export default function EditBlogPage() {
       title: '',
       description: '',
       coverImage: '',
+      keywords: '',
     },
   });
   
@@ -74,6 +77,7 @@ export default function EditBlogPage() {
             title: fetchedPost.title,
             description: fetchedPost.description,
             coverImage: fetchedPost.coverImage,
+            keywords: fetchedPost.keywords || '',
           });
         } else {
           setError('Blog post not found.');
@@ -210,6 +214,27 @@ export default function EditBlogPage() {
                             height={300}
                           />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="keywords"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Tags className="h-4 w-4" /> SEO Keywords
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="e.g., physics, quantum mechanics, class 12"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Separate keywords with a comma.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -27,8 +27,53 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../../../components/ui/alert-dialog.jsx';
-import Head from 'next/head.js';
 
+export async function generateMetadata({ params }) {
+  const post = await getBlogPostBySlug(params.slug);
+  if (!post) {
+    return {
+      title: 'Post Not Found',
+    };
+  }
+
+  const siteUrl = 'https://allinvestigatoryprojects.netlify.app';
+  const postUrl = `${siteUrl}/blogs/${post.slug}`;
+  const description = post.description.substring(0, 160);
+
+  return {
+    title: `${post.title} | All Investigatory Projects`,
+    description: description,
+    keywords: post.keywords,
+    openGraph: {
+      title: post.title,
+      description: description,
+      url: postUrl,
+      siteName: 'All Investigatory Projects',
+      images: [
+        {
+          url: post.coverImage,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      locale: 'en_US',
+      type: 'article',
+      publishedTime: post.createdAt?.toDate().toISOString(),
+      modifiedTime: post.updatedAt?.toDate().toISOString() || post.createdAt?.toDate().toISOString(),
+      author: post.authorName,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: description,
+      images: [post.coverImage],
+      creator: '@yourtwitterhandle', // Replace with your actual Twitter handle
+    },
+    alternates: {
+      canonical: postUrl,
+    },
+  };
+}
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -183,6 +228,7 @@ export default function BlogPostPage() {
       headline: post.title,
       description: post.description.substring(0, 150),
       image: post.coverImage,
+      keywords: post.keywords,
       author: {
         '@type': 'Person',
         name: post.authorName || 'Anonymous',
@@ -224,28 +270,10 @@ export default function BlogPostPage() {
 
   return (
     <>
-      <Head>
-        <title>{`${post.title} | All Investigatory Projects`}</title>
-        <meta name="description" content={post.description.substring(0, 160)} />
-
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.description.substring(0, 160)} />
-        <meta property="og:image" content={post.coverImage} />
-        <meta property="og:url" content={`https://allinvestigatoryprojects.netlify.app/blogs/${post.slug}`} />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={post.description.substring(0, 160)} />
-        <meta name="twitter:image" content={post.coverImage} />
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData()) }}
-        />
-      </Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData()) }}
+      />
       <article className="container mx-auto max-w-4xl px-4 py-12 sm:py-16">
         <header className="mb-8">
           <h1 className="font-headline text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1>
