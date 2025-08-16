@@ -2,12 +2,12 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getPdfById, getPdfs } from '../../../services/firestore.js';
+import { getPdfById, getPdfs, incrementPdfViewCount } from '../../../services/firestore.js';
 import { Loader } from '../../../components/Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert.jsx';
 import { Badge } from '../../../components/ui/badge.jsx';
 import { Button } from '../../../components/ui/button.jsx';
-import { Download, AlertCircle, Book, Tag, User } from 'lucide-react';
+import { Download, AlertCircle, Book, Tag, User, Eye } from 'lucide-react';
 import { RelatedPdfs } from '../../../components/RelatedPdfs.jsx';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useParams } from 'next/navigation.js';
@@ -30,7 +30,9 @@ export default function PdfViewerPage() {
       setLoading(true);
       setError(null);
       try {
+        await incrementPdfViewCount(id);
         const fetchedPdf = await getPdfById(id);
+        
         if (fetchedPdf) {
           setPdf(fetchedPdf);
           // Fetch related PDFs
@@ -91,6 +93,10 @@ export default function PdfViewerPage() {
                     <div className="flex items-center gap-1.5">
                     <Tag className="h-4 w-4" />
                     <Badge variant="outline">{pdf.class}</Badge>
+                    </div>
+                     <div className="flex items-center gap-1.5">
+                      <Eye className="h-4 w-4" />
+                      <span>{pdf.views || 0} views</span>
                     </div>
                 </div>
                 <Button asChild>

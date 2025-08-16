@@ -1,12 +1,5 @@
 
-
-
-
-
-
-
-
-import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -83,6 +76,7 @@ export const savePdfDocument = async (pdfData, user) => {
       authorId: user.uid,
       authorName: authorName,
       createdAt: serverTimestamp(),
+      views: 0,
     });
   } catch (error) {
     console.error('Error saving PDF document to Firestore:', error);
@@ -115,6 +109,21 @@ export const getPdfById = async (id) => {
   } catch (error) {
     console.error("Error fetching document:", error);
     throw error;
+  }
+};
+
+export const incrementPdfViewCount = async (pdfId) => {
+  if (!pdfId) return;
+
+  const pdfRef = doc(db, 'pdfs', pdfId);
+  try {
+    await updateDoc(pdfRef, {
+      views: increment(1)
+    });
+  } catch (error) {
+    // It's okay if this fails, e.g., document doesn't exist yet.
+    // The main functionality of viewing the PDF shouldn't be blocked.
+    console.error("Could not increment view count:", error.message);
   }
 };
 
@@ -194,7 +203,8 @@ export const deletePdf = async (pdfId) => {
   try {
     const pdfRef = doc(db, 'pdfs', pdfId);
     await deleteDoc(pdfRef);
-  } catch (error) {
+  } catch (error)
+  {
     console.error('Error deleting PDF from Firestore:', error);
     throw error;
   }
