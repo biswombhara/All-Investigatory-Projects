@@ -30,7 +30,7 @@ function BlogPostCard({ post }) {
           <h2 className="font-headline text-2xl font-bold group-hover:text-primary">{post.title}</h2>
           <p className="mt-2 text-muted-foreground line-clamp-3">{post.description}</p>
           <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <p>By {post.authorName}</p>
+            <p>{post.authorName}</p>
             <span>•</span>
             <p>{postDate}</p>
           </div>

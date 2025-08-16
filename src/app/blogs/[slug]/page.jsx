@@ -145,7 +145,7 @@ export default function BlogPostPage() {
         <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            <span>By {post.authorName || 'Anonymous'}</span>
+            <span>{post.authorName || 'Anonymous'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
