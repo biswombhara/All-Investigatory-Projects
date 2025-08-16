@@ -18,6 +18,7 @@ export default function PdfViewerPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { hideLoader } = useContext(LoadingContext);
+  const { id } = params;
 
 
   useEffect(() => {
@@ -25,12 +26,12 @@ export default function PdfViewerPage({ params }) {
       setLoading(true);
       setError(null);
       try {
-        const fetchedPdf = await getPdfById(params.id);
+        const fetchedPdf = await getPdfById(id);
         if (fetchedPdf) {
           setPdf(fetchedPdf);
           // Fetch related PDFs
           const allPdfs = await getPdfs();
-          const related = allPdfs.filter(p => p.subject === fetchedPdf.subject && p.id !== params.id).slice(0, 5);
+          const related = allPdfs.filter(p => p.subject === fetchedPdf.subject && p.id !== id).slice(0, 5);
           setRelatedPdfs(related);
         } else {
           setError('Document not found.');
@@ -45,7 +46,7 @@ export default function PdfViewerPage({ params }) {
     };
 
     fetchPdf();
-  }, [hideLoader, params.id]);
+  }, [hideLoader, id]);
 
   if (loading) {
     return <Loader />;
