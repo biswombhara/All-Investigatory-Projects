@@ -101,116 +101,107 @@ export default function CreateBlogPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-14rem)] w-full bg-gradient-to-br from-primary/10 via-background to-background">
-      <div className="container mx-auto flex flex-col items-center justify-center px-4 py-12">
-        <div className="mb-8 w-full max-w-4xl text-center">
-          <FileText className="mx-auto h-16 w-16 text-primary" />
-          <h1 className="mt-4 font-headline text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Create a New Blog Post
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Share your knowledge and insights with the community.
-          </p>
-        </div>
-
-        {user ? (
-          <Card className="w-full max-w-4xl shadow-xl">
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl">
-                New Post
-              </CardTitle>
-              <CardDescription>
-                Fill in the details below. You can use Markdown for formatting the content.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-lg"><Type className="h-5 w-5" /> Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your Post Title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="excerpt"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-lg">Excerpt</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="A short summary of your post..."
-                            rows={2}
-                            {...field}
-                          />
-                        </FormControl>
-                         <FormDescription>
-                           This will be shown on the main blog page.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 text-lg">Content</FormLabel>
-                        <FormControl>
-                           <div data-color-mode={theme}>
-                              <MDEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                                height={400}
-                                preview="edit"
-                              />
-                            </div>
-                        </FormControl>
-                         <FormDescription>
-                          You can use markdown for headings, lists, links, etc.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={isSubmitting}
-                    className="w-full md:w-auto"
-                  >
-                    {isSubmitting ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="mr-2 h-4 w-4" />
-                    )}
-                    {isSubmitting ? 'Publishing...' : 'Publish Post'}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+    <div className="min-h-[calc(100vh-8rem)] w-full bg-background">
+      <div className="container mx-auto px-4 py-8">
+        {!user ? (
+           <div className="flex flex-col items-center justify-center h-[60vh]">
+            <Alert className="max-w-md border-primary/50 bg-primary/10 text-center">
+              <AlertCircle className="h-4 w-4 text-primary" />
+              <AlertTitle className="text-primary">Authentication Required</AlertTitle>
+              <AlertDescription>
+                You need to be logged in to create a blog post.
+              </AlertDescription>
+              <Button onClick={handleLogin} className="mt-4">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login with Google
+              </Button>
+            </Alert>
+          </div>
         ) : (
-          <Alert className="mt-8 max-w-3xl border-primary/50 bg-primary/10 text-center">
-            <AlertCircle className="h-4 w-4 text-primary" />
-            <AlertTitle className="text-primary">Authentication Required</AlertTitle>
-            <AlertDescription>
-              You need to be logged in to create a blog post.
-            </AlertDescription>
-            <Button onClick={handleLogin} className="mt-4">
-              <LogIn className="mr-2 h-4 w-4" />
-              Login with Google
-            </Button>
-          </Alert>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="font-headline text-3xl font-bold">Create Post</h1>
+                     <Button
+                        type="submit"
+                        size="lg"
+                        disabled={isSubmitting}
+                        className="w-full md:w-auto"
+                      >
+                        {isSubmitting ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="mr-2 h-4 w-4" />
+                        )}
+                        {isSubmitting ? 'Publishing...' : 'Publish Post'}
+                      </Button>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 space-y-6">
+                      <FormField
+                          control={form.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="Title" {...field} className="text-2xl font-bold h-14 border-0 shadow-none focus-visible:ring-0 px-0" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                       <FormField
+                          control={form.control}
+                          name="content"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <div data-color-mode={theme}>
+                                    <MDEditor
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      height={500}
+                                      preview="edit"
+                                    />
+                                  </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                  </div>
+                  <div className="lg:col-span-1">
+                      <Card>
+                        <CardHeader>
+                            <CardTitle>Post settings</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <FormField
+                              control={form.control}
+                              name="excerpt"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Search Description</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder="A short summary of your post for search results..."
+                                      rows={4}
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    This will be shown on the main blog page and in search engine results.
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                        </CardContent>
+                      </Card>
+                  </div>
+                </div>
+              </form>
+            </Form>
         )}
       </div>
     </div>
