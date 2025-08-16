@@ -18,10 +18,10 @@ export default function PdfViewerPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { hideLoader } = useContext(LoadingContext);
-  const { id } = params;
 
 
   useEffect(() => {
+    const { id } = params;
     const fetchPdf = async () => {
       setLoading(true);
       setError(null);
@@ -46,7 +46,7 @@ export default function PdfViewerPage({ params }) {
     };
 
     fetchPdf();
-  }, [hideLoader, id]);
+  }, [params, hideLoader]);
 
   if (loading) {
     return <Loader />;
