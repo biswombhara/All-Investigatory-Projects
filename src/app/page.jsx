@@ -1,3 +1,4 @@
+
 'use client';
 
 import { HeroSection } from '../components/HeroSection.jsx';
@@ -13,7 +14,7 @@ import { PdfList } from '../components/PdfList.jsx';
 
 
 const categories = [
-  { name: 'Mathematics', imageUrl: 'https://placehold.co/600x400.png', hint: 'mathematics equation' },
+  { name: 'Mathematics', imageUrl: '/category-card/math.jpg', hint: 'mathematics equation' },
   { name: 'Physics', imageUrl: '/category-card/physics.jpg', hint: 'physics atoms' },
   { name: 'Chemistry', imageUrl: '/category-card/chemistry.jpg', hint: 'chemistry beakers' },
   { name: 'Biology', imageUrl: '/category-card/biology.jpg', hint: 'biology dna' },
