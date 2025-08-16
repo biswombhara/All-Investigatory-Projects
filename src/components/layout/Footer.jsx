@@ -44,7 +44,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t pt-6 text-center">
+        <div className="mt-8 pt-6 text-center">
             <div className="mb-6 flex flex-wrap justify-center gap-x-6 gap-y-2">
                 {quickLinks.map(link => (
                     <Link key={link.href} href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -52,6 +52,7 @@ export function Footer() {
                     </Link>
                 ))}
             </div>
+             <div className="my-6 border-t border-border"></div>
             <p className="text-sm text-muted-foreground">
                 &copy; {new Date().getFullYear()} All Investigatory Projects. All rights reserved.
             </p>
