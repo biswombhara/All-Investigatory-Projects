@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -121,10 +122,10 @@ export function PdfCard({ pdf }) {
             Summarize
           </Button>
           <Button asChild size="sm" className="rounded-full h-8 px-3 text-xs">
-            <a href={pdf.url} target="_blank" rel="noopener noreferrer">
-              <Eye className="mr-1.5 h-3 w-3" />
-              View
-            </a>
+            <Link href={`/pdfs/${pdf.id}`}>
+                <Eye className="mr-1.5 h-3 w-3" />
+                View
+            </Link>
           </Button>
         </CardFooter>
       </Card>

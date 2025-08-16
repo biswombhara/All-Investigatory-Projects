@@ -5,6 +5,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -98,6 +99,22 @@ export const getPdfs = async () => {
   } catch (error) {
     console.error("Error fetching PDFs:", error);
     return [];
+  }
+};
+
+export const getPdfById = async (id) => {
+  try {
+    const docRef = doc(db, 'pdfs', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      console.log("No such document!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    throw error;
   }
 };
 
