@@ -1,3 +1,4 @@
+
 import { Youtube, Mail, Send } from 'lucide-react';
 import Link from 'next/link';
 
@@ -22,6 +23,7 @@ export function Footer() {
               <li><Link href="/connect" className="text-muted-foreground hover:text-primary transition-colors">Connect</Link></li>
               <li><Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/disclaimer" className="text-muted-foreground hover:text-primary transition-colors">Disclaimer</Link></li>
               <li><Link href="/copyright-removal" className="text-muted-foreground hover:text-primary transition-colors">Copyright Removal</Link></li>
             </ul>
           </div>
