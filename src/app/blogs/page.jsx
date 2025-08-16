@@ -21,29 +21,32 @@ function BlogPostCard({ post }) {
   
   const formatDate = (timestamp) => {
     if (!timestamp) return 'Just now';
-    return new Date(timestamp.seconds * 1000).toLocaleDateString();
+    return new Date(timestamp.seconds * 1000).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   };
-
 
   return (
     <Link href={`/blogs/${post.slug}`} className="group block">
-      <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-primary/50">
+      <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-primary/50">
+        {post.coverImage && (
+          <div className="relative aspect-video w-full overflow-hidden">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              data-ai-hint="blog cover"
+            />
+          </div>
+        )}
         <CardHeader>
-           {post.coverImage && (
-            <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                 data-ai-hint="blog cover"
-              />
-            </div>
-          )}
           <CardTitle className="font-headline text-xl mt-4">{post.title}</CardTitle>
           <CardDescription className="line-clamp-3 text-base">{post.excerpt}</CardDescription>
         </CardHeader>
-        <CardFooter className="flex items-center gap-4">
+        <CardFooter className="mt-auto flex items-center gap-4">
           <Avatar>
             <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
             <AvatarFallback>{getInitials(post.authorName)}</AvatarFallback>
@@ -114,8 +117,8 @@ export default function BlogsPage() {
       ) : (
         <div className="text-center text-muted-foreground py-16">
             <BookOpen className="mx-auto h-12 w-12" />
-          <p className="mt-4 text-xl">No blog posts yet.</p>
-          <p className="mt-2">Be the first to share something with the community!</p>
+          <p className="mt-4 text-xl">No published posts yet.</p>
+          <p className="mt-2">Why not be the first to write something?</p>
         </div>
       )}
     </div>

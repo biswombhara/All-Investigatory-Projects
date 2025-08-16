@@ -6,11 +6,13 @@ import { getBlogPostBySlug, deleteBlogPost } from '../../../services/firestore.j
 import { Loader } from '../../../components/Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert.jsx';
 import { Button } from '../../../components/ui/button.jsx';
-import { AlertCircle, User, Calendar, Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { Badge } from '../../../components/ui/badge.jsx';
+import { AlertCircle, User, Calendar, Edit, Trash2, ArrowLeft, Tag } from 'lucide-react';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useParams, useRouter } from 'next/navigation.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../../../components/ui/avatar.jsx';
 import Link from 'next/link.js';
+import Image from 'next/image';
 import MDEditor from '@uiw/react-md-editor';
 import { AuthContext } from '../../../context/AuthContext.jsx';
 import { useToast } from '../../../hooks/use-toast.js';
@@ -39,7 +41,7 @@ export default function BlogPostPage() {
         if (fetchedPost) {
           setPost(fetchedPost);
         } else {
-          setError('Blog post not found.');
+          setError('Blog post not found or it is still a draft.');
         }
       } catch (err) {
         setError('Failed to load the blog post.');
@@ -108,6 +110,19 @@ export default function BlogPostPage() {
                  Back to Blog
               </Link>
             </Button>
+            
+            {post.coverImage && (
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-8 shadow-lg">
+                    <Image
+                        src={post.coverImage}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                </div>
+            )}
+
             <h1 className="font-headline text-4xl font-bold tracking-tight md:text-5xl">{post.title}</h1>
             <div className="mt-4 flex items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -122,6 +137,14 @@ export default function BlogPostPage() {
                     <time dateTime={post.createdAt?.seconds * 1000}>{formatDate(post.createdAt)}</time>
                 </div>
             </div>
+             {post.tags && post.tags.length > 0 && (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    {post.tags.map(tag => (
+                        <Badge key={tag} variant="secondary">{tag}</Badge>
+                    ))}
+                </div>
+            )}
             {isAuthor && (
                 <div className="mt-6 flex gap-2">
                     <Button asChild variant="outline">

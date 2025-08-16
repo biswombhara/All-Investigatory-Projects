@@ -3,6 +3,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -334,7 +335,7 @@ export const updateBlogPost = async (postId, postData) => {
 
 export const getBlogPosts = async () => {
   try {
-    const q = query(collection(db, 'blogPosts'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'blogPosts'), where('status', '==', 'published'), orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
@@ -351,7 +352,16 @@ export const getBlogPostBySlug = async (slug) => {
       return null;
     }
     const doc = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
+    const post = { id: doc.id, ...doc.data() };
+    
+    // Only return the post if it's published
+    if (post.status !== 'published') {
+        // You might want to check for author permissions here in a real app
+        // to allow authors to view their own drafts.
+        // For simplicity, we'll just return null for non-published posts.
+        return null;
+    }
+    return post;
   } catch (error) {
     console.error("Error fetching blog post by slug:", error);
     throw error;
