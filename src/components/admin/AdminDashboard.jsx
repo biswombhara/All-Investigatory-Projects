@@ -13,7 +13,7 @@ import { BlogsTab } from './BlogsTab.jsx';
 export function AdminDashboard() {
   return (
     <Tabs defaultValue="requests" className="w-full">
-      <TabsList className="grid w-full grid-cols-6">
+      <TabsList className="grid w-full grid-cols-1 h-auto md:h-10 md:grid-cols-6">
         <TabsTrigger value="requests">PDF Requests</TabsTrigger>
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
