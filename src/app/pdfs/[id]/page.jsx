@@ -44,10 +44,8 @@ export default function PdfViewerPage({ params }) {
       }
     };
 
-    if (params.id) {
-        fetchPdf();
-    }
-  }, [params.id, hideLoader]);
+    fetchPdf();
+  }, [hideLoader, params.id]);
 
   if (loading) {
     return <Loader />;
@@ -66,7 +64,7 @@ export default function PdfViewerPage({ params }) {
   }
 
   // Modify the URL for embedding
-  const embedUrl = pdf.url.replace('/view', '/preview');
+  const embedUrl = pdf.url.replace('/view', '/preview').replace('?usp=sharing', '&embedded=true');
 
   return (
     <div className="bg-secondary/30">
