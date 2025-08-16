@@ -295,3 +295,72 @@ export const updateContactSubmissionStatus = async (submissionId, status) => {
     throw error;
   }
 };
+
+// Blog specific functions
+export const saveBlogPost = async (postData, user) => {
+  if (!user) throw new Error('User must be authenticated to create a post.');
+  try {
+    const docRef = await addDoc(collection(db, 'blogPosts'), {
+      ...postData,
+      authorId: user.uid,
+      authorName: user.displayName,
+      authorPhotoURL: user.photoURL,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error saving blog post:', error);
+    throw error;
+  }
+};
+
+export const updateBlogPost = async (postId, postData) => {
+  try {
+    const postRef = doc(db, 'blogPosts', postId);
+    await updateDoc(postRef, {
+      ...postData,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error updating blog post:', error);
+    throw error;
+  }
+};
+
+
+export const getBlogPosts = async () => {
+  try {
+    const q = query(collection(db, 'blogPosts'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    return [];
+  }
+};
+
+export const getBlogPostBySlug = async (slug) => {
+  try {
+    const q = query(collection(db, 'blogPosts'), where('slug', '==', slug));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return null;
+    }
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error("Error fetching blog post by slug:", error);
+    throw error;
+  }
+};
+
+export const deleteBlogPost = async (postId) => {
+    try {
+        const postRef = doc(db, 'blogPosts', postId);
+        await deleteDoc(postRef);
+    } catch (error) {
+        console.error('Error deleting blog post:', error);
+        throw error;
+    }
+};
