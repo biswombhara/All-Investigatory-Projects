@@ -9,17 +9,13 @@ import { Button } from '../../../../components/ui/button.jsx';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '../../../../components/ui/form.jsx';
 import { Input } from '../../../../components/ui/input.jsx';
-import { Textarea } from '../../../../components/ui/textarea.jsx';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../../components/ui/card.jsx';
 import { useToast } from '../../../../hooks/use-toast.js';
-import { Send, AlertCircle, Loader2, Type, FileText } from 'lucide-react';
+import { Send, AlertCircle, Loader2 } from 'lucide-react';
 import { AuthContext } from '../../../../context/AuthContext.jsx';
 import { Alert, AlertTitle, AlertDescription } from '../../../../components/ui/alert.jsx';
 import { updateBlogPost, getBlogPostBySlug } from '../../../../services/firestore.js';
@@ -32,7 +28,6 @@ import { useTheme } from 'next-themes';
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100, 'Title cannot exceed 100 characters.'),
-  excerpt: z.string().min(10, 'Excerpt must be at least 10 characters.').max(200, 'Excerpt cannot exceed 200 characters.'),
   content: z.string().min(50, 'Content must be at least 50 characters.'),
 });
 
@@ -51,7 +46,6 @@ export default function EditBlogPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      excerpt: '',
       content: '',
     },
   });
@@ -67,7 +61,6 @@ export default function EditBlogPage() {
           setPost(fetchedPost);
           form.reset({
             title: fetchedPost.title,
-            excerpt: fetchedPost.excerpt,
             content: fetchedPost.content,
           });
           // Authorization check
@@ -104,7 +97,10 @@ export default function EditBlogPage() {
     showLoader();
 
     try {
-      await updateBlogPost(post.id, values);
+      await updateBlogPost(post.id, {
+        title: values.title,
+        content: values.content,
+      });
       toast({
         title: 'Post Updated!',
         description: 'Your blog post has been successfully updated.',
@@ -134,16 +130,15 @@ export default function EditBlogPage() {
 
   return (
     <div className="min-h-[calc(100vh-8rem)] w-full bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-8">
                 <h1 className="font-headline text-3xl font-bold">Edit Post</h1>
                     <Button
                     type="submit"
                     size="lg"
                     disabled={isSubmitting}
-                    className="w-full md:w-auto"
                     >
                     {isSubmitting ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -153,69 +148,42 @@ export default function EditBlogPage() {
                     {isSubmitting ? 'Saving...' : 'Save Changes'}
                     </Button>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-6">
-                    <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormControl>
-                             <Input placeholder="Title" {...field} className="text-2xl font-bold h-14 border-0 shadow-none focus-visible:ring-0 px-0" />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                    <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormControl>
-                            <div data-color-mode={theme}>
-                            <MDEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                                height={500}
-                                preview="edit"
-                            />
-                            </div>
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                </div>
-                <div className="lg:col-span-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Post settings</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="excerpt"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Search Description</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                        placeholder="A short summary of your post for search results..."
-                                        rows={4}
-                                        {...field}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        This will be shown on the main blog page and in search engine results.
-                                    </FormDescription>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-                    </Card>
-                </div>
+            <div className="space-y-6">
+                <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormControl>
+                         <Input 
+                            placeholder="Title" 
+                            {...field} 
+                            className="text-4xl font-extrabold h-auto p-2 border-0 border-b-2 rounded-none focus-visible:ring-0 focus:border-primary transition-colors" 
+                         />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormControl>
+                        <div data-color-mode={theme}>
+                        <MDEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                            height={600}
+                            preview="edit"
+                        />
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
             </div>
             </form>
         </Form>
