@@ -11,6 +11,7 @@ import { AuthProvider } from '../context/AuthContext.jsx';
 import { LoadingProvider, LoadingContext } from '../context/LoadingContext.jsx';
 import Head from 'next/head.js';
 import { VisitorCounter } from '../components/VisitorCounter.jsx';
+import { ThemeProvider } from 'next-themes';
 
 function AppContent({ children }) {
   const { loading } = useContext(LoadingContext);
@@ -71,11 +72,18 @@ export default function RootLayout({
         ></script>
       </Head>
       <body className={cn('min-h-screen bg-background font-body antialiased')}>
-        <AuthProvider>
-          <LoadingProvider>
-            <AppContent>{children}</AppContent>
-          </LoadingProvider>
-        </AuthProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <AuthProvider>
+            <LoadingProvider>
+              <AppContent>{children}</AppContent>
+            </LoadingProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

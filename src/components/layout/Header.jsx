@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -6,12 +5,14 @@ import Image from 'next/image';
 import { useState, useContext } from 'react';
 import { Button } from '../ui/button.jsx';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '../ui/sheet.jsx';
-import { Menu, LogOut, LogIn, Edit, Shield } from 'lucide-react';
+import { Menu, LogOut, LogIn, Edit, Shield, Moon, Sun } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext.jsx';
 import { signOutUser } from '../../services/auth.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar.jsx';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
 import { usePathname } from 'next/navigation.js';
+import { useTheme } from 'next-themes';
+
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -21,7 +22,6 @@ const NavLink = ({ href, children, onClick }) => {
   const pathname = usePathname();
 
   const handleClick = (e) => {
-    // Only show loader if navigating to a different page
     if (pathname !== href) {
       showLoader();
     }
@@ -48,11 +48,11 @@ export function Header() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const { user, signIn } = useContext(AuthContext);
   const { showLoader, hideLoader } = useContext(LoadingContext);
+  const { setTheme, theme } = useTheme();
 
   const handleLogin = async () => {
     showLoader();
     try {
-      // Use the signIn method from context to ensure token is captured
       await signIn();
     } catch (error) {
       if (error.code !== 'auth/popup-closed-by-user') {
@@ -114,6 +114,11 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
+           <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
           {user ? (
             <>
               <Button onClick={handleLogout} variant="outline">

@@ -1,17 +1,19 @@
-
 'use client';
 
 import { HeroSection } from '../components/HeroSection.jsx';
 import { Button } from '../components/ui/button.jsx';
-import { ArrowRight, FileQuestion, UploadCloud } from 'lucide-react';
+import { ArrowRight, FileQuestion, UploadCloud, Star } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card.jsx';
 import { CategoryCard } from '../components/CategoryCard.jsx';
 import { FaqSection } from '../components/FaqSection.jsx';
+import { useEffect, useState } from 'react';
+import { getPdfs } from '../services/firestore.js';
+import { PdfList } from '../components/PdfList.jsx';
 
 
 const categories = [
-  { name: 'Mathematics', imageUrl: '/category-card/math.jpg', hint: 'mathematics equation' },
+  { name: 'Mathematics', imageUrl: 'https://placehold.co/600x400.png', hint: 'mathematics equation' },
   { name: 'Physics', imageUrl: '/category-card/physics.jpg', hint: 'physics atoms' },
   { name: 'Chemistry', imageUrl: '/category-card/chemistry.jpg', hint: 'chemistry beakers' },
   { name: 'Biology', imageUrl: '/category-card/biology.jpg', hint: 'biology dna' },
@@ -19,12 +21,60 @@ const categories = [
   { name: 'English', imageUrl: '/category-card/english.jpg', hint: 'english books' },
 ];
 
+function FeaturedDocuments() {
+  const [featuredPdfs, setFeaturedPdfs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedPdfs = async () => {
+      setLoading(true);
+      try {
+        const allPdfs = await getPdfs();
+        // Get the 4 most recent documents
+        setFeaturedPdfs(allPdfs.slice(0, 4));
+      } catch (error) {
+        console.error("Failed to fetch featured PDFs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeaturedPdfs();
+  }, []);
+
+  if (loading) {
+    return null; // Or a loading skeleton
+  }
+  
+  if (featuredPdfs.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="py-16 sm:py-20 lg:py-24 bg-background">
+      <div className="container mx-auto px-4">
+        <div className="mb-10 text-center md:mb-16">
+          <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            Featured Documents
+          </h2>
+          <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Check out the latest additions to our library.
+          </p>
+        </div>
+        <div className="max-w-5xl mx-auto">
+           <PdfList pdfs={featuredPdfs} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 export default function Home() {
 
   return (
     <div className="flex flex-col">
       <HeroSection />
+      <FeaturedDocuments />
        <section className="py-16 sm:py-20 lg:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="mb-10 text-center md:mb-16">
