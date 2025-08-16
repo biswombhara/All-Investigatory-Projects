@@ -68,8 +68,9 @@ export default function PdfViewerPage() {
     );
   }
 
-  // Modify the URL for embedding
-  const embedUrl = pdf.url.replace('/view', '/preview').replace('?usp=sharing', '&embedded=true');
+  // Modify the URL for embedding and removing the pop-out button
+  const embedUrl = pdf.url.replace('/view?usp=sharing', '/preview?embedded=true').replace('/view', '/preview?embedded=true');
+
 
   return (
     <div className="bg-secondary/30">
