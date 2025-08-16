@@ -45,6 +45,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-6 text-center">
+            <div className="my-6 border-t border-border"></div>
             <div className="mb-6 flex flex-wrap justify-center gap-x-6 gap-y-2">
                 {quickLinks.map(link => (
                     <Link key={link.href} href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">
