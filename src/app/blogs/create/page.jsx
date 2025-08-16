@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import React, { useContext, useState } from 'react';
-import { Button } from '../../components/ui/button.jsx';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,14 +13,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../../components/ui/form.jsx';
-import { Input } from '../../components/ui/input.jsx';
-import { Textarea } from '../../components/ui/textarea.jsx';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card.jsx';
-import { useToast } from '../../hooks/use-toast.js';
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import { Send, Image as ImageIcon, Type, MessageSquare, LogIn, Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
-import { AuthContext } from '../../context/AuthContext.jsx';
-import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert.jsx';
+import { AuthContext } from '@/context/AuthContext';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,9 +29,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../components/ui/alert-dialog.jsx';
-import { saveBlogPost } from '../../services/firestore.js';
-import { LoadingContext } from '../../context/LoadingContext.jsx';
+} from '@/components/ui/alert-dialog';
+import { saveBlogPost } from '@/services/firestore';
+import { LoadingContext } from '@/context/LoadingContext';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
