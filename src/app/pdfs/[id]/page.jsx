@@ -101,13 +101,15 @@ export default function PdfViewerPage() {
                 </Button>
                 </div>
 
-                <div className="aspect-[8.5/11] w-full rounded-lg bg-background shadow-lg">
-                <iframe
-                    src={embedUrl}
-                    className="h-full w-full rounded-lg border-0"
-                    allow="fullscreen"
-                    title={pdf.title}
-                ></iframe>
+                <div className="relative aspect-[8.5/11] w-full rounded-lg bg-background shadow-lg overflow-hidden">
+                    <iframe
+                        src={embedUrl}
+                        className="h-full w-full border-0"
+                        allow="fullscreen"
+                        title={pdf.title}
+                    ></iframe>
+                    {/* This div is the overlay to hide the pop-out button */}
+                    <div className="absolute top-0 right-0 h-14 w-14 bg-background"></div>
                 </div>
             </div>
 
