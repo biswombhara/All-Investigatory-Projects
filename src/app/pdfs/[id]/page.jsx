@@ -10,19 +10,23 @@ import { Button } from '../../../components/ui/button.jsx';
 import { Download, AlertCircle, Book, Tag, User } from 'lucide-react';
 import { RelatedPdfs } from '../../../components/RelatedPdfs.jsx';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
+import { useParams } from 'next/navigation.js';
 
 
-export default function PdfViewerPage({ params }) {
+export default function PdfViewerPage() {
   const [pdf, setPdf] = useState(null);
   const [relatedPdfs, setRelatedPdfs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { hideLoader } = useContext(LoadingContext);
+  const params = useParams();
 
 
   useEffect(() => {
-    const { id } = params;
     const fetchPdf = async () => {
+      const { id } = params;
+      if (!id) return;
+      
       setLoading(true);
       setError(null);
       try {
