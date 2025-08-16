@@ -1,3 +1,4 @@
+
 'use client';
 
 import './globals.css';
@@ -37,7 +38,7 @@ export default function RootLayout({
   const description =
     "Access and download investigatory project PDFs on various subjects, curated from our YouTube channel. Your ultimate resource for educational materials.";
   const imageUrl =
-    'https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj';
+    'https://example.com/my-new-icon.png'; // <-- CHANGE THIS URL
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -59,7 +60,7 @@ export default function RootLayout({
         <meta property="twitter:image" content={imageUrl} />
         
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https/fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
