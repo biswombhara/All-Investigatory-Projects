@@ -1,10 +1,11 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import React, { useContext, useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button.jsx';
+import { Button } from '../../components/ui/button.jsx';
 import {
   Form,
   FormControl,
@@ -12,16 +13,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form.jsx';
-import { Input } from '@/components/ui/input.jsx';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card.jsx';
-import { useToast } from '@/hooks/use-toast.js';
+} from '../../components/ui/form.jsx';
+import { Input } from '../../components/ui/input.jsx';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card.jsx';
+import { useToast } from '../../hooks/use-toast.js';
 import { Loader2, User, Save, LogIn, ShieldCheck } from 'lucide-react';
-import { AuthContext } from '@/context/AuthContext.jsx';
-import { LoadingContext } from '@/context/LoadingContext.jsx';
-import { updateUserProfile } from '@/services/auth.js';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.jsx';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert.jsx';
+import { AuthContext } from '../../context/AuthContext.jsx';
+import { LoadingContext } from '../../context/LoadingContext.jsx';
+import { updateUserProfile } from '../../services/auth.js';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar.jsx';
+import { Alert, AlertTitle, AlertDescription } from '../../components/ui/alert.jsx';
 
 
 const formSchema = z.object({
