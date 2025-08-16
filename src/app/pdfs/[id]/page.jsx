@@ -109,7 +109,7 @@ export default function PdfViewerPage() {
                         title={pdf.title}
                     ></iframe>
                     {/* This div is the overlay to hide the pop-out button */}
-                    <div className="absolute top-0 right-0 h-14 w-14 bg-background"></div>
+                    <div className="absolute top-0 right-0 h-14 w-14 bg-black"></div>
                 </div>
             </div>
 
