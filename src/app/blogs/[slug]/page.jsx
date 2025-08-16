@@ -27,10 +27,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../../../components/ui/alert-dialog.jsx';
+import Head from 'next/head.js';
 
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-
 
 const Comment = ({ comment, isAdmin, onDelete }) => {
   const { toast } = useToast();
@@ -86,7 +86,6 @@ const Comment = ({ comment, isAdmin, onDelete }) => {
   );
 };
 
-
 export default function BlogPostPage() {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -100,7 +99,6 @@ export default function BlogPostPage() {
   const hasLiked = post?.likes?.includes(user?.uid);
   const isAuthor = post?.authorId === user?.uid;
   const isAdmin = user && user.email === ADMIN_EMAIL;
-
 
   const fetchPostAndComments = async () => {
     const { slug } = params;
@@ -172,6 +170,35 @@ export default function BlogPostPage() {
       console.error("Failed to delete comment:", error);
     }
   };
+  
+  const generateStructuredData = () => {
+    if (!post) return null;
+    
+    const postDate = post.createdAt?.toDate ? post.createdAt.toDate().toISOString() : new Date().toISOString();
+    const modifiedDate = post.updatedAt?.toDate ? post.updatedAt.toDate().toISOString() : postDate;
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.description.substring(0, 150),
+      image: post.coverImage,
+      author: {
+        '@type': 'Person',
+        name: post.authorName || 'Anonymous',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'All Investigatory Projects',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj',
+        },
+      },
+      datePublished: postDate,
+      dateModified: modifiedDate,
+    };
+  };
 
   if (loading) {
     return <Loader />;
@@ -196,84 +223,109 @@ export default function BlogPostPage() {
   const postDate = post.createdAt?.toDate ? format(post.createdAt.toDate(), 'PPP') : 'Just now';
 
   return (
-    <article className="container mx-auto max-w-4xl px-4 py-12 sm:py-16">
-      <header className="mb-8">
-        <h1 className="font-headline text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1>
-        <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span>{post.authorName || 'Anonymous'}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>{postDate}</span>
-          </div>
-           {isAuthor && (
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/blogs/${post.slug}/edit`}>
-                <Edit className="mr-2 h-4 w-4" /> Edit Post
-              </Link>
-            </Button>
-          )}
-        </div>
-      </header>
+    <>
+      <Head>
+        <title>{`${post.title} | All Investigatory Projects`}</title>
+        <meta name="description" content={post.description.substring(0, 160)} />
 
-      {post.coverImage && (
-        <div className="relative mb-8 h-80 w-full overflow-hidden rounded-lg shadow-lg">
-          <Image
-            src={post.coverImage}
-            alt={post.title}
-            fill
-            className="object-cover"
-            data-ai-hint="blog cover"
-          />
-        </div>
-      )}
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.description.substring(0, 160)} />
+        <meta property="og:image" content={post.coverImage} />
+        <meta property="og:url" content={`https://allinvestigatoryprojects.netlify.app/blogs/${post.slug}`} />
 
-      <div className="prose prose-lg max-w-none text-foreground dark:prose-invert" data-color-mode="dark">
-         <MDEditor.Markdown source={post.description} style={{ whiteSpace: 'pre-wrap', background: 'transparent' }} />
-      </div>
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={post.title} />
+        <meta name="twitter:description" content={post.description.substring(0, 160)} />
+        <meta name="twitter:image" content={post.coverImage} />
 
-       <div className="mt-8 border-t pt-6">
-        <div className="flex items-center gap-6">
-          <Button variant="ghost" onClick={handleLike} disabled={!user} className="flex items-center gap-2">
-            <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
-            <span>{post.likes?.length || 0} Likes</span>
-          </Button>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MessageCircle className="h-5 w-5" />
-            <span>{comments.length} Comments</span>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData()) }}
+        />
+      </Head>
+      <article className="container mx-auto max-w-4xl px-4 py-12 sm:py-16">
+        <header className="mb-8">
+          <h1 className="font-headline text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1>
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span>{post.authorName || 'Anonymous'}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>{postDate}</span>
+            </div>
+            {isAuthor && (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/blogs/${post.slug}/edit`}>
+                  <Edit className="mr-2 h-4 w-4" /> Edit Post
+                </Link>
+              </Button>
+            )}
           </div>
-        </div>
-      </div>
-      
-      <div className="mt-8 border-t pt-8">
-        <h2 className="font-headline text-2xl font-bold">Comments</h2>
-        {user ? (
-            <form onSubmit={handleCommentSubmit} className="mt-4 flex flex-col gap-4">
-                <Textarea 
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add your comment..."
-                    rows={3}
-                />
-                <Button type="submit" disabled={isSubmittingComment} className="self-start">
-                    {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
-                    <Send className="ml-2 h-4 w-4" />
-                </Button>
-            </form>
-        ) : (
-            <p className="mt-4 text-muted-foreground">You must be logged in to comment.</p>
+        </header>
+
+        {post.coverImage && (
+          <div className="relative mb-8 h-80 w-full overflow-hidden rounded-lg shadow-lg">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              className="object-cover"
+              data-ai-hint="blog cover"
+              priority
+            />
+          </div>
         )}
 
-        <div className="mt-8 space-y-6">
-            {comments.length > 0 ? (
-                comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={handleCommentDelete} />)
-            ) : (
-                <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
-            )}
+        <div className="prose prose-lg max-w-none text-foreground dark:prose-invert" data-color-mode="dark">
+          <MDEditor.Markdown source={post.description} style={{ whiteSpace: 'pre-wrap', background: 'transparent' }} />
         </div>
-      </div>
-    </article>
+
+        <div className="mt-8 border-t pt-6">
+          <div className="flex items-center gap-6">
+            <Button variant="ghost" onClick={handleLike} disabled={!user} className="flex items-center gap-2">
+              <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
+              <span>{post.likes?.length || 0} Likes</span>
+            </Button>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MessageCircle className="h-5 w-5" />
+              <span>{comments.length} Comments</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-8 border-t pt-8">
+          <h2 className="font-headline text-2xl font-bold">Comments</h2>
+          {user ? (
+              <form onSubmit={handleCommentSubmit} className="mt-4 flex flex-col gap-4">
+                  <Textarea 
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add your comment..."
+                      rows={3}
+                  />
+                  <Button type="submit" disabled={isSubmittingComment} className="self-start">
+                      {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
+                      <Send className="ml-2 h-4 w-4" />
+                  </Button>
+              </form>
+          ) : (
+              <p className="mt-4 text-muted-foreground">You must be logged in to comment.</p>
+          )}
+
+          <div className="mt-8 space-y-6">
+              {comments.length > 0 ? (
+                  comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={handleCommentDelete} />)
+              ) : (
+                  <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+              )}
+          </div>
+        </div>
+      </article>
+    </>
   );
 }
