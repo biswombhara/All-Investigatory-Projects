@@ -7,6 +7,7 @@ import { Loader } from '../../components/Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from '../../components/ui/alert.jsx';
 import { Lock } from 'lucide-react';
 import { AdminDashboard } from '../../components/admin/AdminDashboard.jsx';
+import { VisitorCounter } from '../../components/VisitorCounter.jsx';
 
 // In a real app, this would be an environment variable
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -49,7 +50,10 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-8 font-headline text-4xl font-bold">Admin Dashboard</h1>
-      <AdminDashboard />
+      <VisitorCounter />
+      <div className="mt-8">
+         <AdminDashboard />
+      </div>
     </div>
   );
 }

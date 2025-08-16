@@ -11,7 +11,6 @@ import { Loader } from '../components/Loader.jsx';
 import { AuthProvider } from '../context/AuthContext.jsx';
 import { LoadingProvider, LoadingContext } from '../context/LoadingContext.jsx';
 import Head from 'next/head.js';
-import { VisitorCounter } from '../components/VisitorCounter.jsx';
 import { ThemeProvider } from 'next-themes';
 
 function AppContent({ children }) {
@@ -23,7 +22,6 @@ function AppContent({ children }) {
       <div className="relative flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">{children}</main>
-        <VisitorCounter />
         <Footer />
       </div>
       <Toaster />
@@ -38,7 +36,7 @@ export default function RootLayout({
   const description =
     "Access and download investigatory project PDFs on various subjects, curated from our YouTube channel. Your ultimate resource for educational materials.";
   const imageUrl =
-    'https://example.com/my-new-icon.png'; // <-- CHANGE THIS URL
+    'https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj'; 
 
   return (
     <html lang="en" suppressHydrationWarning>
