@@ -37,12 +37,14 @@ export default function RootLayout({
     "Access and download investigatory project PDFs on various subjects, curated from our YouTube channel by Biswombhara Patra. Your ultimate resource for educational materials.";
   const imageUrl =
     'https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj'; 
+  const keywords = "Biswombhara Patra, investigatory projects, educational pdfs, study notes, physics, chemistry, biology, mathematics, computer science";
 
   return (
     <html lang="en" suppressHydrationWarning>
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
+        <meta name="keywords" content={keywords} />
         <link rel="icon" href={imageUrl} sizes="any" />
         
         {/* Open Graph / Facebook */}
