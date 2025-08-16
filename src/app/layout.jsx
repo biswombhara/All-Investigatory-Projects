@@ -34,10 +34,10 @@ export default function RootLayout({
 }) {
   const title = 'All Investigatory Projects - Your Source for Educational PDFs';
   const description =
-    "Access and download investigatory project PDFs on various subjects, curated from our YouTube channel by Biswombhara Patra. Your ultimate resource for educational materials.";
+    "Download free project PDFs on physics, chemistry, biology, mathematics, english and many more subjects. Class 6th to 12th and for college projects also.";
   const imageUrl =
     'https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj'; 
-  const keywords = "Biswombhara Patra, investigatory projects, educational pdfs, study notes, physics, chemistry, biology, mathematics, computer science";
+  const keywords = "Biswombhara Patra, all investigatory projects, investigatory projects, study notes, physics investigatory project, chemistry investigatory project, biology investigatory project, mathematics investigatory project, computer science investigatory project, english investigatory project, class 12 physics project file pdf download, class 12 investigatory project, class 12 investigatory project chemistry";
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -46,6 +46,7 @@ export default function RootLayout({
         <meta name="description" content={description} />
         <meta name="keywords" content={keywords} />
         <link rel="icon" href={imageUrl} sizes="any" />
+        <link rel="canonical" href="https://allinvestigatoryprojects.netlify.app"></link>
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
