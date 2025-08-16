@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -39,7 +40,7 @@ export function VisitorCounter() {
           <p className="font-headline text-2xl font-bold text-foreground">
             {visitorCount.toLocaleString()}
           </p>
-          <p className="text-sm text-muted-foreground">Community Members</p>
+          <p className="text-sm text-muted-foreground">Our Reach</p>
         </div>
       </div>
     </div>
