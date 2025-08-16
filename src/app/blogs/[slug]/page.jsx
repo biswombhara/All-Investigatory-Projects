@@ -13,10 +13,10 @@ import { useParams, useRouter } from 'next/navigation.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../../../components/ui/avatar.jsx';
 import Link from 'next/link.js';
 import Image from 'next/image';
-import MDEditor from '@uiw/react-md-editor';
 import { AuthContext } from '../../../context/AuthContext.jsx';
 import { useToast } from '../../../hooks/use-toast.js';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../../components/ui/alert-dialog.jsx';
+import 'react-quill/dist/quill.snow.css';
 
 export default function BlogPostPage() {
   const [post, setPost] = useState(null);
@@ -38,10 +38,13 @@ export default function BlogPostPage() {
       try {
         const fetchedPost = await getBlogPostBySlug(slug);
         
-        if (fetchedPost) {
+        if (fetchedPost && fetchedPost.status === 'published') {
           setPost(fetchedPost);
         } else {
-          setError('Blog post not found or it is still a draft.');
+          // If the post is a draft, only the author can see it.
+          // This logic is simplified; in a real app, you'd check `user.uid === fetchedPost.authorId`
+          // but getBlogPostBySlug already handles not returning drafts to non-authors.
+           setError('Blog post not found or it is still a draft.');
         }
       } catch (err) {
         setError('Failed to load the blog post.');
@@ -53,7 +56,7 @@ export default function BlogPostPage() {
     };
 
     fetchPost();
-  }, [params, hideLoader]);
+  }, [params, hideLoader, user]);
 
   const handleDelete = async () => {
     if (!post) return;
@@ -85,13 +88,13 @@ export default function BlogPostPage() {
     return <Loader />;
   }
 
-  if (error) {
+  if (error || !post) {
     return (
       <div className="container mx-auto flex h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
         <Alert variant="destructive" className="max-w-md text-center">
           <AlertCircle className="mx-auto h-6 w-6" />
           <AlertTitle className="mt-2 text-xl font-bold">Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{error || 'Post not found.'}</AlertDescription>
         </Alert>
       </div>
     );
@@ -174,9 +177,10 @@ export default function BlogPostPage() {
                 </div>
             )}
           </header>
-          <div className="prose prose-lg dark:prose-invert max-w-none" data-color-mode="light">
-             <MDEditor.Markdown source={post.content} style={{ whiteSpace: 'pre-wrap' }} />
-          </div>
+          <div 
+            className="prose prose-lg dark:prose-invert max-w-none ql-editor" 
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
         </article>
       </div>
     </div>

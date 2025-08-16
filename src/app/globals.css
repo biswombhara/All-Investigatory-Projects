@@ -71,3 +71,36 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.ql-editor {
+  min-height: 300px;
+}
+
+.dark .ql-toolbar {
+  border-color: hsl(var(--border));
+}
+
+.dark .ql-container {
+  border-color: hsl(var(--border));
+}
+
+.dark .ql-toolbar .ql-stroke {
+  stroke: hsl(var(--foreground));
+}
+
+.dark .ql-toolbar .ql-fill {
+  fill: hsl(var(--foreground));
+}
+
+.dark .ql-toolbar .ql-picker-label {
+  color: hsl(var(--foreground));
+}
+
+.dark .ql-picker-options {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+}
+
+.dark .ql-picker-options .ql-picker-item {
+  color: hsl(var(--foreground));
+}

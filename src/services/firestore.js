@@ -4,6 +4,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -312,7 +313,8 @@ export const saveBlogPost = async (postData, user) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
-    return docRef.id;
+    // Return the full document so the slug can be used for redirect
+    return { id: docRef.id, slug: postData.slug };
   } catch (error) {
     console.error('Error saving blog post:', error);
     throw error;
@@ -344,7 +346,7 @@ export const getBlogPosts = async () => {
   }
 };
 
-export const getBlogPostBySlug = async (slug) => {
+export const getBlogPostBySlug = async (slug, includeDraft = false) => {
   try {
     const q = query(collection(db, 'blogPosts'), where('slug', '==', slug));
     const querySnapshot = await getDocs(q);
@@ -354,11 +356,7 @@ export const getBlogPostBySlug = async (slug) => {
     const doc = querySnapshot.docs[0];
     const post = { id: doc.id, ...doc.data() };
     
-    // Only return the post if it's published
-    if (post.status !== 'published') {
-        // You might want to check for author permissions here in a real app
-        // to allow authors to view their own drafts.
-        // For simplicity, we'll just return null for non-published posts.
+    if (post.status !== 'published' && !includeDraft) {
         return null;
     }
     return post;

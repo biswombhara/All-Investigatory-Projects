@@ -24,9 +24,12 @@ import { updateBlogPost, getBlogPostBySlug } from '../../../../services/firestor
 import { LoadingContext } from '../../../../context/LoadingContext.jsx';
 import { useRouter, useParams } from 'next/navigation';
 import { Loader } from '../../../../components/Loader.jsx';
-import MDEditor from '@uiw/react-md-editor';
+import 'react-quill/dist/quill.snow.css';
+import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card.jsx';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100, 'Title cannot exceed 100 characters.'),
@@ -57,9 +60,7 @@ export default function EditBlogPage() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { theme } = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [preview, setPreview] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -83,7 +84,7 @@ export default function EditBlogPage() {
       if (!slug) return;
       
       try {
-        const fetchedPost = await getBlogPostBySlug(slug);
+        const fetchedPost = await getBlogPostBySlug(slug, true); // Fetch draft as well
         if (fetchedPost) {
           setPost(fetchedPost);
           form.reset({
@@ -139,8 +140,8 @@ export default function EditBlogPage() {
       router.push(values.status === 'published' ? `/blogs/${slug}` : `/blogs/${slug}/edit`);
     } catch (err) {
        toast({ title: 'Update Failed', description: 'Something went wrong. Please try again.', variant: 'destructive' });
-       setIsSubmitting(false);
     } finally {
+      setIsSubmitting(false);
       hideLoader();
     }
   }
@@ -167,11 +168,7 @@ export default function EditBlogPage() {
             <div className="container mx-auto flex items-center justify-between p-4">
               <h1 className="text-2xl font-bold">Edit Post</h1>
               <div className="flex items-center gap-4">
-                <Button type="button" variant="outline" onClick={() => setPreview(!preview)}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  {preview ? 'Editor' : 'Preview'}
-                </Button>
-                <Button type="submit" onClick={() => form.setValue('status', 'draft')} disabled={isSubmitting}>
+                 <Button type="submit" onClick={() => form.setValue('status', 'draft')} disabled={isSubmitting}>
                   {isSubmitting && form.getValues('status') === 'draft' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                   Save Draft
                 </Button>
@@ -204,14 +201,13 @@ export default function EditBlogPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <div data-color-mode={theme}>
-                        <MDEditor
+                       <ReactQuill
+                          theme="snow"
                           value={field.value}
                           onChange={field.onChange}
-                          height={600}
-                          preview={preview ? 'preview' : 'edit'}
+                          className="bg-background"
+                          style={{ height: '600px' }}
                         />
-                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
