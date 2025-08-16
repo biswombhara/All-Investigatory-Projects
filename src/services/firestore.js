@@ -6,6 +6,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -298,6 +299,50 @@ export const updateContactSubmissionStatus = async (submissionId, status) => {
     await updateDoc(submissionRef, { status });
   } catch (error) {
     console.error('Error updating contact submission status:', error);
+    throw error;
+  }
+};
+
+// Blog Functions
+export const saveBlogPost = async (postData, user) => {
+  if (!user) throw new Error('User must be authenticated to create a post.');
+
+  try {
+    await addDoc(collection(db, 'blogPosts'), {
+      ...postData,
+      authorId: user.uid,
+      authorName: user.displayName,
+      authorPhotoURL: user.photoURL,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error saving blog post:', error);
+    throw error;
+  }
+};
+
+export const getBlogPosts = async () => {
+  try {
+    const q = query(collection(db, 'blogPosts'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    return [];
+  }
+};
+
+export const getBlogPostBySlug = async (slug) => {
+  try {
+    const q = query(collection(db, 'blogPosts'), where('slug', '==', slug));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return null;
+    }
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    console.error("Error fetching blog post by slug:", error);
     throw error;
   }
 };
