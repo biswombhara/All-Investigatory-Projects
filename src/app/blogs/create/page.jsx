@@ -4,7 +4,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { Button } from '../../../components/ui/button.jsx';
 import {
   Form,
@@ -15,19 +15,19 @@ import {
 } from '../../../components/ui/form.jsx';
 import { Input } from '../../../components/ui/input.jsx';
 import { useToast } from '../../../hooks/use-toast.js';
-import { Send, LogIn, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, LogIn, AlertCircle, Loader2, CheckCircle, Save } from 'lucide-react';
 import { AuthContext } from '../../../context/AuthContext.jsx';
 import { Alert, AlertTitle, AlertDescription } from '../../../components/ui/alert.jsx';
-import { saveBlogPost } from '../../../services/firestore.js';
+import { saveBlogPost, updateBlogPost } from '../../../services/firestore.js';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useRouter } from 'next/navigation';
 import MDEditor from '@uiw/react-md-editor';
 import { useTheme } from 'next-themes';
-
+import debounce from 'lodash.debounce';
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100, 'Title cannot exceed 100 characters.'),
-  content: z.string().min(50, 'Content must be at least 50 characters.'),
+  content: z.string(),
 });
 
 const createSlug = (title) => {
@@ -46,6 +46,8 @@ export default function CreateBlogPage() {
   const { showLoader, hideLoader } = useContext(LoadingContext);
   const router = useRouter();
   const { theme } = useTheme();
+  const [postId, setPostId] = useState(null);
+  const [saveStatus, setSaveStatus] = useState('Unsaved'); // 'Saved', 'Saving...', 'Unsaved'
 
 
   const form = useForm({
@@ -55,6 +57,50 @@ export default function CreateBlogPage() {
       content: '',
     },
   });
+
+  const { watch, trigger } = form;
+  
+  const debouncedSave = useCallback(
+    debounce(async (values) => {
+      if (!user) return;
+      setSaveStatus('Saving...');
+      const isValid = await trigger();
+      if (!isValid) {
+        setSaveStatus('Unsaved');
+        return;
+      }
+      
+      const slug = createSlug(values.title);
+
+      try {
+        if (postId) {
+          // If we have a post ID, we're updating an existing draft
+          await updateBlogPost(postId, { ...values, slug });
+        } else {
+          // Otherwise, we're creating the first version of the post
+          const newPostId = await saveBlogPost({ ...values, slug }, user);
+          setPostId(newPostId); // Store the new ID for subsequent saves
+        }
+        setSaveStatus('Saved');
+      } catch (err) {
+        toast({ title: 'Save Failed', description: 'Could not save changes.', variant: 'destructive' });
+        setSaveStatus('Unsaved');
+      }
+    }, 1500), // 1.5-second debounce delay
+    [user, postId, trigger, toast]
+  );
+  
+  useEffect(() => {
+    if (!user) return;
+    const subscription = watch((values) => {
+      if (values.title.length > 4) { // Only start saving when there's a title
+        setSaveStatus('Unsaved');
+        debouncedSave(values);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, debouncedSave, user]);
+
 
   const { isSubmitting } = form.formState;
 
@@ -68,10 +114,13 @@ export default function CreateBlogPage() {
     const slug = createSlug(values.title);
 
     try {
-      // Create an excerpt from the first 150 characters of the content
-      const excerpt = values.content.substring(0, 150) + '...';
+       if (postId) {
+        await updateBlogPost(postId, { ...values, slug });
+      } else {
+        const newPostId = await saveBlogPost({ ...values, slug }, user);
+        setPostId(newPostId);
+      }
 
-      await saveBlogPost({ ...values, excerpt, slug }, user);
       toast({
         title: 'Post Published!',
         description: 'Your blog post is now live.',
@@ -97,6 +146,18 @@ export default function CreateBlogPage() {
     }
   };
 
+  const SaveStatusIcon = () => {
+    switch (saveStatus) {
+      case 'Saving...':
+        return <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
+      case 'Saved':
+        return <CheckCircle className="mr-2 h-4 w-4 text-green-500" />;
+      default:
+        return <Save className="mr-2 h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+
   return (
     <div className="min-h-[calc(100vh-8rem)] w-full bg-background">
       <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -118,11 +179,14 @@ export default function CreateBlogPage() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="font-headline text-3xl font-bold">New Post</h1>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <SaveStatusIcon />
+                      <span>{saveStatus}</span>
+                    </div>
                      <Button
                         type="submit"
                         size="lg"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || saveStatus !== 'Saved'}
                       >
                         {isSubmitting ? (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -142,7 +206,7 @@ export default function CreateBlogPage() {
                             <Input 
                                 placeholder="Title" 
                                 {...field} 
-                                className="text-4xl font-extrabold h-auto p-2 border-0 border-b-2 rounded-none focus-visible:ring-0 focus:border-primary transition-colors" 
+                                className="text-4xl font-extrabold h-auto p-2 border-0 border-b-2 rounded-none focus-visible:ring-0 focus:border-primary transition-colors bg-transparent" 
                             />
                             </FormControl>
                             <FormMessage />
@@ -161,6 +225,7 @@ export default function CreateBlogPage() {
                                     onChange={field.onChange}
                                     height={600}
                                     preview="edit"
+                                    commands={['bold', 'italic', 'strikethrough', 'hr', 'title', 'link', 'quote', 'code', 'image']}
                                 />
                                 </div>
                             </FormControl>

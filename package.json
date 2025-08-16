@@ -43,6 +43,7 @@
     "firebase-admin": "^12.2.0",
     "framer-motion": "^11.2.10",
     "genkit": "^1.0.0",
+    "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.475.0",
     "next": "15.3.3",
     "next-themes": "^0.3.0",

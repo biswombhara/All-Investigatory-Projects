@@ -4,7 +4,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { Button } from '../../../../components/ui/button.jsx';
 import {
   Form,
@@ -15,7 +15,7 @@ import {
 } from '../../../../components/ui/form.jsx';
 import { Input } from '../../../../components/ui/input.jsx';
 import { useToast } from '../../../../hooks/use-toast.js';
-import { Send, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, AlertCircle, Loader2, CheckCircle, Save } from 'lucide-react';
 import { AuthContext } from '../../../../context/AuthContext.jsx';
 import { Alert, AlertTitle, AlertDescription } from '../../../../components/ui/alert.jsx';
 import { updateBlogPost, getBlogPostBySlug } from '../../../../services/firestore.js';
@@ -24,23 +24,25 @@ import { useRouter, useParams } from 'next/navigation';
 import { Loader } from '../../../../components/Loader.jsx';
 import MDEditor from '@uiw/react-md-editor';
 import { useTheme } from 'next-themes';
+import debounce from 'lodash.debounce';
 
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100, 'Title cannot exceed 100 characters.'),
-  content: z.string().min(50, 'Content must be at least 50 characters.'),
+  content: z.string(),
 });
 
 export default function EditBlogPage() {
   const { toast } = useToast();
   const { user } = useContext(AuthContext);
-  const { showLoader, hideLoader } = useContext(LoadingContext);
+  const { hideLoader, showLoader } = useContext(LoadingContext);
   const router = useRouter();
   const params = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { theme } = useTheme();
+  const [saveStatus, setSaveStatus] = useState('Saved'); // 'Saved', 'Saving...', 'Unsaved'
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -49,6 +51,37 @@ export default function EditBlogPage() {
       content: '',
     },
   });
+  
+  const { watch, trigger } = form;
+
+  const debouncedSave = useCallback(
+    debounce(async (values) => {
+      if (!post) return;
+      setSaveStatus('Saving...');
+      const isValid = await trigger();
+      if (isValid) {
+        try {
+          await updateBlogPost(post.id, values);
+          setSaveStatus('Saved');
+        } catch (err) {
+          toast({ title: 'Save Failed', description: 'Could not save changes.', variant: 'destructive' });
+          setSaveStatus('Unsaved');
+        }
+      } else {
+        setSaveStatus('Unsaved');
+      }
+    }, 1500), // 1.5-second debounce delay
+    [post, trigger, toast]
+  );
+
+  useEffect(() => {
+    const subscription = watch((values) => {
+      setSaveStatus('Unsaved');
+      debouncedSave(values);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, debouncedSave]);
+
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -77,9 +110,11 @@ export default function EditBlogPage() {
         hideLoader();
       }
     };
-    if (user) { // Only fetch if user is loaded
+    if (user === undefined) return; // Wait for user state to be determined
+
+    if (user) { 
         fetchPost();
-    } else if (user === null) { // user state is loaded but no user
+    } else {
         setLoading(false);
         hideLoader();
     }
@@ -88,19 +123,18 @@ export default function EditBlogPage() {
 
   const { isSubmitting } = form.formState;
 
+  // Manual submit handler, though auto-save is primary
   async function onSubmit(values) {
     if (!user || user.uid !== post.authorId) {
       toast({ title: 'Authorization Error', description: 'You are not allowed to edit this post.', variant: 'destructive' });
       return;
     }
-
+    
     showLoader();
-
+    setSaveStatus('Saving...');
     try {
-      await updateBlogPost(post.id, {
-        title: values.title,
-        content: values.content,
-      });
+      await updateBlogPost(post.id, values);
+      setSaveStatus('Saved');
       toast({
         title: 'Post Updated!',
         description: 'Your blog post has been successfully updated.',
@@ -108,6 +142,7 @@ export default function EditBlogPage() {
       router.push(`/blogs/${post.slug}`);
     } catch (err) {
        toast({ title: 'Update Failed', description: 'Something went wrong. Please try again.', variant: 'destructive' });
+       setSaveStatus('Unsaved');
     } finally {
       hideLoader();
     }
@@ -127,6 +162,17 @@ export default function EditBlogPage() {
     );
   }
 
+  const SaveStatusIcon = () => {
+    switch (saveStatus) {
+      case 'Saving...':
+        return <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
+      case 'Saved':
+        return <CheckCircle className="mr-2 h-4 w-4 text-green-500" />;
+      default:
+        return <Save className="mr-2 h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
 
   return (
     <div className="min-h-[calc(100vh-8rem)] w-full bg-background">
@@ -134,19 +180,22 @@ export default function EditBlogPage() {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex justify-between items-center mb-8">
-                <h1 className="font-headline text-3xl font-bold">Edit Post</h1>
-                    <Button
+                <div className="flex items-center text-sm text-muted-foreground">
+                    <SaveStatusIcon />
+                    <span>{saveStatus}</span>
+                </div>
+                <Button
                     type="submit"
                     size="lg"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || saveStatus === 'Saving...'}
                     >
                     {isSubmitting ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                         <Send className="mr-2 h-4 w-4" />
                     )}
-                    {isSubmitting ? 'Saving...' : 'Save Changes'}
-                    </Button>
+                    {isSubmitting ? 'Publishing...' : 'Publish'}
+                </Button>
             </div>
             <div className="space-y-6">
                 <FormField
@@ -158,7 +207,7 @@ export default function EditBlogPage() {
                          <Input 
                             placeholder="Title" 
                             {...field} 
-                            className="text-4xl font-extrabold h-auto p-2 border-0 border-b-2 rounded-none focus-visible:ring-0 focus:border-primary transition-colors" 
+                            className="text-4xl font-extrabold h-auto p-2 border-0 border-b-2 rounded-none focus-visible:ring-0 focus:border-primary transition-colors bg-transparent" 
                          />
                     </FormControl>
                     <FormMessage />
@@ -177,6 +226,7 @@ export default function EditBlogPage() {
                             onChange={field.onChange}
                             height={600}
                             preview="edit"
+                            commands={['bold', 'italic', 'strikethrough', 'hr', 'title', 'link', 'quote', 'code', 'image']}
                         />
                         </div>
                     </FormControl>
