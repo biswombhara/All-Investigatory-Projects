@@ -25,6 +25,9 @@ import { Alert, AlertTitle, AlertDescription } from '../../../components/ui/aler
 import { saveBlogPost } from '../../../services/firestore.js';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useRouter } from 'next/navigation';
+import MDEditor from '@uiw/react-md-editor';
+import { useTheme } from 'next-themes';
+
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100, 'Title cannot exceed 100 characters.'),
@@ -47,6 +50,8 @@ export default function CreateBlogPage() {
   const { user, signIn } = useContext(AuthContext);
   const { showLoader, hideLoader } = useContext(LoadingContext);
   const router = useRouter();
+  const { theme } = useTheme();
+
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -161,11 +166,14 @@ export default function CreateBlogPage() {
                       <FormItem>
                         <FormLabel className="flex items-center gap-2 text-lg">Content</FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder="Write your post here. Markdown is supported."
-                            rows={15}
-                            {...field}
-                          />
+                           <div data-color-mode={theme}>
+                              <MDEditor
+                                value={field.value}
+                                onChange={field.onChange}
+                                height={400}
+                                preview="edit"
+                              />
+                            </div>
                         </FormControl>
                          <FormDescription>
                           You can use markdown for headings, lists, links, etc.

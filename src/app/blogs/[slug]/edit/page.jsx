@@ -26,6 +26,9 @@ import { updateBlogPost, getBlogPostBySlug } from '../../../../services/firestor
 import { LoadingContext } from '../../../../context/LoadingContext.jsx';
 import { useRouter, useParams } from 'next/navigation';
 import { Loader } from '../../../../components/Loader.jsx';
+import MDEditor from '@uiw/react-md-editor';
+import { useTheme } from 'next-themes';
+
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.').max(100, 'Title cannot exceed 100 characters.'),
@@ -42,6 +45,7 @@ export default function EditBlogPage() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { theme } = useTheme();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -198,11 +202,14 @@ export default function EditBlogPage() {
                         <FormItem>
                         <FormLabel className="flex items-center gap-2 text-lg">Content</FormLabel>
                         <FormControl>
-                            <Textarea
-                            placeholder="Write your post here. Markdown is supported."
-                            rows={15}
-                            {...field}
-                            />
+                           <div data-color-mode={theme}>
+                              <MDEditor
+                                value={field.value}
+                                onChange={field.onChange}
+                                height={400}
+                                preview="edit"
+                              />
+                            </div>
                         </FormControl>
                         <FormMessage />
                         </FormItem>

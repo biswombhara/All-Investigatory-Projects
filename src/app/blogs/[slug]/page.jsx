@@ -11,7 +11,7 @@ import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useParams, useRouter } from 'next/navigation.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../../../components/ui/avatar.jsx';
 import Link from 'next/link.js';
-import ReactMarkdown from 'react-markdown';
+import MDEditor from '@uiw/react-md-editor';
 import { AuthContext } from '../../../context/AuthContext.jsx';
 import { useToast } from '../../../hooks/use-toast.js';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../../components/ui/alert-dialog.jsx';
@@ -151,8 +151,8 @@ export default function BlogPostPage() {
                 </div>
             )}
           </header>
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <ReactMarkdown>{post.content}</ReactMarkdown>
+          <div className="prose prose-lg dark:prose-invert max-w-none" data-color-mode="light">
+             <MDEditor.Markdown source={post.content} style={{ whiteSpace: 'pre-wrap' }} />
           </div>
         </article>
       </div>
