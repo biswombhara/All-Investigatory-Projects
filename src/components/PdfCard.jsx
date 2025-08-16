@@ -1,45 +1,35 @@
 import React from 'react';
 import Link from 'next/link';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from './ui/card.jsx';
-import { Button } from './ui/button.jsx';
-import { Badge } from './ui/badge.jsx';
-import { Eye, User } from 'lucide-react';
+import { Card, CardContent } from './ui/card.jsx';
+import Image from 'next/image';
 
 export function PdfCard({ pdf }) {
-
   return (
-    <>
-      <Card className="flex h-full flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 rounded-xl">
-        <CardHeader className="p-3">
-          <CardTitle className="font-headline text-base font-semibold leading-tight line-clamp-2">
-            {pdf.title}
-          </CardTitle>
-          <div className="mt-1 flex items-center text-xs text-muted-foreground">
-            <User className="mr-1.5 h-3 w-3" />
-            <span>{pdf.authorName || 'Anonymous'}</span>
+    <Link href={`/pdfs/${pdf.id}`} className="block group">
+      <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden">
+        <div className="flex items-center gap-4">
+          <div className="relative h-28 w-24 flex-shrink-0 bg-secondary/50">
+            {pdf.publicId && (
+              <Image
+                src={`https://drive.google.com/thumbnail?id=${pdf.publicId}`}
+                alt={`Thumbnail for ${pdf.title}`}
+                fill
+                sizes="(max-width: 768px) 30vw, 10vw"
+                className="object-contain p-1"
+              />
+            )}
           </div>
-        </CardHeader>
-        <CardContent className="flex-grow p-3 pt-0">
-          <div className="flex flex-wrap gap-1">
-            <Badge variant="secondary" className="text-xs">{pdf.subject}</Badge>
-            {pdf.class && <Badge variant="outline" className="text-xs">{pdf.class}</Badge>}
+          <div className="py-4 pr-4">
+            <h3 className="font-headline text-lg font-bold leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+              {pdf.title}
+            </h3>
+            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+               <p>{pdf.subject}</p>
+               {pdf.class && <p>{pdf.class}</p>}
+            </div>
           </div>
-        </CardContent>
-        <CardFooter className="flex justify-end gap-2 bg-secondary/50 p-2">
-          <Button asChild size="sm" className="rounded-full h-8 px-3 text-xs">
-            <Link href={`/pdfs/${pdf.id}`}>
-                <Eye className="mr-1.5 h-3 w-3" />
-                View
-            </Link>
-          </Button>
-        </CardFooter>
+        </div>
       </Card>
-    </>
+    </Link>
   );
 }
