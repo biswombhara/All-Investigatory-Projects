@@ -1,4 +1,5 @@
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -173,6 +174,39 @@ export const saveContactSubmission = async (formData, user) => {
     console.error('Error saving contact submission:', error);
     throw error;
   }
+};
+
+export const incrementVisitorCount = async () => {
+  const statsRef = doc(db, 'siteStats', 'visitorCounter');
+  try {
+    await updateDoc(statsRef, {
+      count: increment(1),
+    });
+  } catch (error) {
+    // If the document doesn't exist, create it.
+    if (error.code === 'not-found') {
+      await setDoc(statsRef, { count: 12345 }); // Starting from a base number
+    } else {
+      console.error('Could not increment visitor count:', error);
+    }
+  }
+};
+
+export const listenToVisitorCount = (callback) => {
+  const statsRef = doc(db, 'siteStats', 'visitorCounter');
+  // Return the unsubscribe function to be called on cleanup
+  return onSnapshot(statsRef, (doc) => {
+    if (doc.exists()) {
+      callback(doc.data().count);
+    } else {
+      // If the document doesn't exist, you might want to initialize it
+      // or handle the state appropriately (e.g., show 0 or a loading state).
+       setDoc(statsRef, { count: 12345 }); // Starting from a base number
+       callback(12345);
+    }
+  }, (error) => {
+      console.error('Error listening to visitor count:', error);
+  });
 };
 
 

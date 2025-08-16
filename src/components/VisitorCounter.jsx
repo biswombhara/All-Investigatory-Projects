@@ -3,33 +3,29 @@
 
 import { useEffect, useState } from 'react';
 import { Users } from 'lucide-react';
+import { listenToVisitorCount, incrementVisitorCount } from '../services/firestore.js';
 
 export function VisitorCounter() {
   const [visitorCount, setVisitorCount] = useState(0);
 
   useEffect(() => {
-    // This logic runs only on the client-side
-    const getVisitorCount = () => {
-      let count = parseInt(localStorage.getItem('visitorCount') || '0', 10);
-      
-      // A simple way to check if it's a "new" visit for this session
-      if (!sessionStorage.getItem('sessionVisited')) {
-        count += 1;
-        localStorage.setItem('visitorCount', count.toString());
-        sessionStorage.setItem('sessionVisited', 'true');
-      }
-      
-      // Add a random base to make the number seem larger for demonstration
-      const baseCount = 12345;
-      return baseCount + count;
-    };
-    
-    setVisitorCount(getVisitorCount());
+    // Increment count only once per session
+    if (!sessionStorage.getItem('sessionVisited')) {
+      incrementVisitorCount();
+      sessionStorage.setItem('sessionVisited', 'true');
+    }
 
+    // Set up a real-time listener for the visitor count
+    const unsubscribe = listenToVisitorCount((count) => {
+      setVisitorCount(count);
+    });
+
+    // Cleanup the listener when the component unmounts
+    return () => unsubscribe();
   }, []);
 
   if (visitorCount === 0) {
-    return null; // Don't render on the server or before the count is determined
+    return null; // Don't render until the count has been fetched
   }
 
   return (
