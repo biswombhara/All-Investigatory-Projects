@@ -33,6 +33,7 @@ export function RelatedPdfs({ pdfs }) {
                   {pdf.title}
                 </h3>
                 <p className="text-xs text-muted-foreground">{pdf.subject}</p>
+                 {pdf.class && <p className="text-xs text-muted-foreground">{pdf.class}</p>}
               </div>
             </div>
           </Link>
