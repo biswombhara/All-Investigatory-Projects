@@ -10,6 +10,7 @@ import { Loader } from '../components/Loader.jsx';
 import { AuthProvider } from '../context/AuthContext.jsx';
 import { LoadingProvider, LoadingContext } from '../context/LoadingContext.jsx';
 import Head from 'next/head.js';
+import { VisitorCounter } from '../components/VisitorCounter.jsx';
 
 function AppContent({ children }) {
   const { loading } = useContext(LoadingContext);
@@ -20,6 +21,7 @@ function AppContent({ children }) {
       <div className="relative flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">{children}</main>
+        <VisitorCounter />
         <Footer />
       </div>
       <Toaster />
