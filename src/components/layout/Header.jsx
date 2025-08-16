@@ -41,7 +41,6 @@ const NavLink = ({ href, children, onClick }) => {
 const navLinks = [
   { href: '/pdfs', label: 'PDFs' },
   { href: '/reviews', label: 'Reviews' },
-  { href: '/connect', label: 'Connect' },
 ];
 
 export function Header() {
