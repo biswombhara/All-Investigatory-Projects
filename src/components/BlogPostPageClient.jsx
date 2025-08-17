@@ -59,7 +59,7 @@ const Comment = ({ comment, isAdmin, onDelete }) => {
         </div>
         <p className="mt-1 text-foreground/90">{comment.text}</p>
       </div>
-      {isAdmin && (
+      {(isAdmin || comment.authorId === onDelete.userId) && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -103,7 +103,14 @@ export default function BlogPostPageClient({ slug, initialPost }) {
         try {
           const fetchedPost = await getBlogPostBySlug(slug);
           if (fetchedPost) {
-            setPost(fetchedPost);
+            const serializedPost = { ...fetchedPost };
+            if (fetchedPost.createdAt && typeof fetchedPost.createdAt.toDate === 'function') {
+                serializedPost.createdAt = fetchedPost.createdAt.toDate().toISOString();
+            }
+            if (fetchedPost.updatedAt && typeof fetchedPost.updatedAt.toDate === 'function') {
+                serializedPost.updatedAt = fetchedPost.updatedAt.toDate().toISOString();
+            }
+            setPost(serializedPost);
             const fetchedComments = await getCommentsForPost(fetchedPost.id);
             setComments(fetchedComments);
           } else {
@@ -117,12 +124,14 @@ export default function BlogPostPageClient({ slug, initialPost }) {
         }
       } else {
         const fetchComments = async () => {
-            try {
-                const fetchedComments = await getCommentsForPost(post.id);
-                setComments(fetchedComments);
-            } catch (err) {
-                console.error("Failed to load comments", err);
-                setError('Failed to load comments.');
+            if (post?.id) {
+              try {
+                  const fetchedComments = await getCommentsForPost(post.id);
+                  setComments(fetchedComments);
+              } catch (err) {
+                  console.error("Failed to load comments", err);
+                  setError('Failed to load comments.');
+              }
             }
         };
         fetchComments();
@@ -277,7 +286,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
           </div>
         )}
 
-        <div className="prose prose-lg max-w-none text-foreground dark:prose-invert" data-color-mode="dark">
+        <div className="prose prose-lg max-w-none text-foreground dark:prose-invert">
           <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
         </div>
 
@@ -315,7 +324,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
 
           <div className="mt-8 space-y-6">
               {comments.length > 0 ? (
-                  comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={handleCommentDelete} />)
+                  comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={(commentId) => handleCommentDelete(commentId)} userId={user?.uid}/>)
               ) : (
                   <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
               )}
@@ -325,3 +334,5 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     </>
   );
 }
+
+    
