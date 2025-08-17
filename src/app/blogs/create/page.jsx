@@ -34,6 +34,7 @@ import {
 import { saveBlogPost } from '../../../services/firestore.js';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useRouter } from 'next/navigation';
+import MDEditor from '@uiw/react-md-editor';
 
 const formSchema = z.object({
   title: z.string().min(10, {
@@ -187,13 +188,14 @@ export default function CreateBlogPage() {
                           <FormLabel className="flex items-center gap-2">
                             <MessageSquare className="h-4 w-4" /> Description
                           </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Write a short description or the main content of your post here..."
-                              rows={8}
-                              {...field}
-                            />
-                          </FormControl>
+                           <FormControl>
+                             <MDEditor
+                                value={field.value}
+                                onChange={field.onChange}
+                                preview="edit"
+                                height={300}
+                              />
+                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
