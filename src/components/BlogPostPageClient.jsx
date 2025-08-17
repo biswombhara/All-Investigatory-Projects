@@ -2,10 +2,10 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment } from '../services/firestore.js';
+import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, incrementBlogPostViewCount } from '../services/firestore.js';
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
-import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit } from 'lucide-react';
+import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from './ui/alert-dialog.jsx';
+import { Card, CardContent, CardHeader } from './ui/card.jsx';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -103,15 +104,17 @@ export default function BlogPostPageClient({ slug, initialPost }) {
         try {
           const fetchedPost = await getBlogPostBySlug(slug);
           if (fetchedPost) {
-            const serializedPost = { ...fetchedPost };
-            if (fetchedPost.createdAt && typeof fetchedPost.createdAt.toDate === 'function') {
-                serializedPost.createdAt = fetchedPost.createdAt.toDate().toISOString();
+            await incrementBlogPostViewCount(fetchedPost.id);
+            const reFetchedPost = await getBlogPostBySlug(slug); // Re-fetch to get updated views
+            const serializedPost = { ...reFetchedPost };
+            if (reFetchedPost.createdAt && typeof reFetchedPost.createdAt.toDate === 'function') {
+                serializedPost.createdAt = reFetchedPost.createdAt.toDate().toISOString();
             }
-            if (fetchedPost.updatedAt && typeof fetchedPost.updatedAt.toDate === 'function') {
-                serializedPost.updatedAt = fetchedPost.updatedAt.toDate().toISOString();
+            if (reFetchedPost.updatedAt && typeof reFetchedPost.updatedAt.toDate === 'function') {
+                serializedPost.updatedAt = reFetchedPost.updatedAt.toDate().toISOString();
             }
             setPost(serializedPost);
-            const fetchedComments = await getCommentsForPost(fetchedPost.id);
+            const fetchedComments = await getCommentsForPost(reFetchedPost.id);
             setComments(fetchedComments);
           } else {
              setError('Blog post not found.');
@@ -140,7 +143,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     };
 
     fetchPostAndComments();
-  }, [slug, initialPost, post?.id]);
+  }, [slug, initialPost]);
 
   const handleLike = async () => {
     if (!user || !post) return;
@@ -246,91 +249,100 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   const postDate = post.createdAt ? format(parseISO(post.createdAt), 'PPP') : 'Just now';
 
   return (
-    <>
+    <div className="container mx-auto max-w-4xl px-4 py-12 sm:py-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData()) }}
       />
-      <article className="container mx-auto max-w-4xl px-4 py-12 sm:py-16">
-        <header className="mb-8">
-          <h1 className="font-headline text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1>
-          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span>{post.authorName || 'Anonymous'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>{postDate}</span>
-            </div>
-            {(isAuthor || isAdmin) && (
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/blogs/${post.slug}/edit`}>
-                  <Edit className="mr-2 h-4 w-4" /> Edit Post
-                </Link>
-              </Button>
-            )}
-          </div>
-        </header>
-
-        {post.coverImage && (
-          <div className="relative mb-8 h-80 w-full overflow-hidden rounded-lg shadow-lg">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              className="object-cover"
-              data-ai-hint="blog cover"
-              priority
-            />
-          </div>
-        )}
-
-        <div className="prose prose-lg max-w-none text-foreground dark:prose-invert">
-          <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
-        </div>
-
-        <div className="mt-8 border-t pt-6">
-          <div className="flex items-center gap-6">
-            <Button variant="ghost" onClick={handleLike} disabled={!user} className="flex items-center gap-2">
-              <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
-              <span>{post.likes?.length || 0} Likes</span>
-            </Button>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MessageCircle className="h-5 w-5" />
-              <span>{comments.length} Comments</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-8 border-t pt-8">
-          <h2 className="font-headline text-2xl font-bold">Comments</h2>
-          {user ? (
-              <form onSubmit={handleCommentSubmit} className="mt-4 flex flex-col gap-4">
-                  <Textarea 
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Add your comment..."
-                      rows={3}
-                  />
-                  <Button type="submit" disabled={isSubmittingComment} className="self-start">
-                      {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
-                      <Send className="ml-2 h-4 w-4" />
-                  </Button>
-              </form>
-          ) : (
-              <p className="mt-4 text-muted-foreground">You must be logged in to comment.</p>
-          )}
-
-          <div className="mt-8 space-y-6">
-              {comments.length > 0 ? (
-                  comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={handleCommentDelete} userId={user?.uid}/>)
-              ) : (
-                  <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+      <Card>
+        <CardHeader>
+          <header className="mb-8">
+            <h1 className="font-headline text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1>
+            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>{post.authorName || 'Anonymous'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>{postDate}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                <span>{post.views || 0} views</span>
+              </div>
+              {(isAuthor || isAdmin) && (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/blogs/${post.slug}/edit`}>
+                    <Edit className="mr-2 h-4 w-4" /> Edit Post
+                  </Link>
+                </Button>
               )}
-          </div>
-        </div>
-      </article>
-    </>
+            </div>
+          </header>
+
+          {post.coverImage && (
+            <div className="relative mb-8 h-80 w-full overflow-hidden rounded-lg shadow-lg">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                data-ai-hint="blog cover"
+                priority
+              />
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          <article>
+            <div className="prose prose-lg max-w-none text-foreground dark:prose-invert">
+              <MDEditor.Markdown source={post.description} />
+            </div>
+
+            <div className="mt-8 border-t pt-6">
+              <div className="flex items-center gap-6">
+                <Button variant="ghost" onClick={handleLike} disabled={!user} className="flex items-center gap-2">
+                  <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                  <span>{post.likes?.length || 0} Likes</span>
+                </Button>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MessageCircle className="h-5 w-5" />
+                  <span>{comments.length} Comments</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 border-t pt-8">
+              <h2 className="font-headline text-2xl font-bold">Comments</h2>
+              {user ? (
+                  <form onSubmit={handleCommentSubmit} className="mt-4 flex flex-col gap-4">
+                      <Textarea 
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Add your comment..."
+                          rows={3}
+                      />
+                      <Button type="submit" disabled={isSubmittingComment} className="self-start">
+                          {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
+                          <Send className="ml-2 h-4 w-4" />
+                      </Button>
+                  </form>
+              ) : (
+                  <p className="mt-4 text-muted-foreground">You must be logged in to comment.</p>
+              )}
+
+              <div className="mt-8 space-y-6">
+                  {comments.length > 0 ? (
+                      comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={handleCommentDelete} userId={user?.uid}/>)
+                  ) : (
+                      <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+                  )}
+              </div>
+            </div>
+          </article>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

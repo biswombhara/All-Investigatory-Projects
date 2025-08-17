@@ -332,8 +332,9 @@ export const saveBlogPost = async (postData, user) => {
       authorName: user.displayName,
       authorPhotoURL: user.photoURL,
       createdAt: serverTimestamp(),
-      likes: [], // Initialize likes as an empty array
+      likes: [],
       keywords: postData.keywords || '',
+      views: 0,
     });
   } catch (error) {
     console.error('Error saving blog post:', error);
@@ -378,6 +379,19 @@ export const getBlogPostBySlug = async (slug) => {
   } catch (error) {
     console.error("Error fetching blog post by slug:", error);
     throw error;
+  }
+};
+
+export const incrementBlogPostViewCount = async (postId) => {
+  if (!postId) return;
+
+  const postRef = doc(db, 'blogPosts', postId);
+  try {
+    await updateDoc(postRef, {
+      views: increment(1)
+    });
+  } catch (error) {
+    console.error("Could not increment blog post view count:", error.message);
   }
 };
 
