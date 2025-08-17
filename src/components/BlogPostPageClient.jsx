@@ -30,7 +30,7 @@ import {
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
-const Comment = ({ comment, isAdmin, onDelete }) => {
+const Comment = ({ comment, isAdmin, onDelete, userId }) => {
   const { toast } = useToast();
   
   const getInitials = (name) => {
@@ -59,7 +59,7 @@ const Comment = ({ comment, isAdmin, onDelete }) => {
         </div>
         <p className="mt-1 text-foreground/90">{comment.text}</p>
       </div>
-      {(isAdmin || comment.authorId === onDelete.userId) && (
+      {(isAdmin || comment.authorId === userId) && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -324,7 +324,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
 
           <div className="mt-8 space-y-6">
               {comments.length > 0 ? (
-                  comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={(commentId) => handleCommentDelete(commentId)} userId={user?.uid}/>)
+                  comments.map(comment => <Comment key={comment.id} comment={comment} isAdmin={isAdmin} onDelete={handleCommentDelete} userId={user?.uid}/>)
               ) : (
                   <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
               )}
@@ -334,5 +334,3 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     </>
   );
 }
-
-    
