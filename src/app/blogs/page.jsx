@@ -10,13 +10,20 @@ import Image from 'next/image.js';
 import { Button } from '../../components/ui/button.jsx';
 import { PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar.jsx';
+
+const getInitials = (name) => {
+    if (!name) return '';
+    const names = name.split(' ');
+    return names.map((n) => n[0]).join('');
+};
 
 function BlogPostCard({ post }) {
   const postDate = post.createdAt?.toDate ? format(post.createdAt.toDate(), 'PPP') : 'Just now';
 
   return (
     <Link href={`/blogs/${post.slug}`}>
-      <Card className="group overflow-hidden transition-shadow duration-300 hover:shadow-xl">
+      <Card className="group flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-xl h-full">
         <div className="relative aspect-video w-full">
           <Image
             src={post.coverImage || 'https://placehold.co/600x400.png'}
@@ -26,13 +33,17 @@ function BlogPostCard({ post }) {
             data-ai-hint="blog cover"
           />
         </div>
-        <CardContent className="p-6">
-          <h2 className="font-headline text-2xl font-bold group-hover:text-primary">{post.title}</h2>
-          <p className="mt-2 text-muted-foreground line-clamp-3">{post.description}</p>
-          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <p>{post.authorName}</p>
-            <span>•</span>
-            <p>{postDate}</p>
+        <CardContent className="flex flex-col flex-grow p-6">
+          <h2 className="font-headline text-2xl font-bold group-hover:text-primary flex-grow">{post.title}</h2>
+          <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground pt-4 border-t">
+             <Avatar className="h-8 w-8">
+                <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
+                <AvatarFallback>{getInitials(post.authorName)}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+                <p className="font-semibold">{post.authorName}</p>
+                <p>{postDate}</p>
+            </div>
           </div>
         </CardContent>
       </Card>
