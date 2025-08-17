@@ -51,6 +51,7 @@ export default function EditBlogPage() {
   const { showLoader, hideLoader } = useContext(LoadingContext);
   const router = useRouter();
   const params = useParams();
+  const [content, setContent] = useState('');
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -79,6 +80,7 @@ export default function EditBlogPage() {
             coverImage: fetchedPost.coverImage,
             keywords: fetchedPost.keywords || '',
           });
+          setContent(fetchedPost.description);
         } else {
           setError('Blog post not found.');
         }
@@ -111,7 +113,7 @@ export default function EditBlogPage() {
     showLoader();
     
     try {
-      await updateBlogPost(post.id, values);
+      await updateBlogPost(post.id, { ...values, description: content });
       toast({
         title: 'Blog Post Updated!',
         description: 'Your post has been successfully updated.',
@@ -209,8 +211,11 @@ export default function EditBlogPage() {
                       <FormControl>
                          <div data-color-mode="light">
                            <MDEditor
-                              value={field.value || ''}
-                              onChange={field.onChange}
+                              value={content || ''}
+                              onChange={(value) => {
+                                setContent(value || '');
+                                field.onChange(value || '');
+                              }}
                               preview="edit"
                               height={300}
                             />

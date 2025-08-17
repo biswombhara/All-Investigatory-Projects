@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { Button } from './ui/button.jsx';
 import { Textarea } from './ui/textarea.jsx';
@@ -89,7 +89,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPost);
   const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
 
@@ -98,26 +98,40 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   const isAdmin = user && user.email === ADMIN_EMAIL;
 
   useEffect(() => {
-    const fetchComments = async () => {
-      if (post) {
+    const fetchPostAndComments = async () => {
+      if (!initialPost) {
         try {
-          const fetchedComments = await getCommentsForPost(post.id);
-          setComments(fetchedComments);
+          const fetchedPost = await getBlogPostBySlug(slug);
+          if (fetchedPost) {
+            setPost(fetchedPost);
+            const fetchedComments = await getCommentsForPost(fetchedPost.id);
+            setComments(fetchedComments);
+          } else {
+             setError('Blog post not found.');
+          }
         } catch (err) {
-            console.error("Failed to load comments", err);
-            setError('Failed to load comments.');
+            console.error("Failed to load post data", err);
+            setError('Failed to load blog post.');
+        } finally {
+            setLoading(false);
         }
+      } else {
+        const fetchComments = async () => {
+            try {
+                const fetchedComments = await getCommentsForPost(post.id);
+                setComments(fetchedComments);
+            } catch (err) {
+                console.error("Failed to load comments", err);
+                setError('Failed to load comments.');
+            }
+        };
+        fetchComments();
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    if (!initialPost) {
-        setError('Blog post not found.');
-        setLoading(false);
-    } else {
-        fetchComments();
-    }
-  }, [post, initialPost]);
+    fetchPostAndComments();
+  }, [slug, initialPost, post?.id]);
 
   const handleLike = async () => {
     if (!user || !post) return;
@@ -166,8 +180,8 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   const generateStructuredData = () => {
     if (!post) return null;
     
-    const postDate = post.createdAt?.toDate ? post.createdAt.toDate().toISOString() : new Date().toISOString();
-    const modifiedDate = post.updatedAt?.toDate ? post.updatedAt.toDate().toISOString() : postDate;
+    const postDate = post.createdAt ? (typeof post.createdAt === 'string' ? post.createdAt : post.createdAt.toDate().toISOString()) : new Date().toISOString();
+    const modifiedDate = post.updatedAt ? (typeof post.updatedAt === 'string' ? post.updatedAt : post.updatedAt.toDate().toISOString()) : postDate;
 
     // Combine title, author, and custom keywords
     const fullKeywords = [
@@ -219,8 +233,8 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   if (!post) {
     return null;
   }
-
-  const postDate = post.createdAt?.toDate ? format(post.createdAt.toDate(), 'PPP') : 'Just now';
+  
+  const postDate = post.createdAt ? format(parseISO(post.createdAt), 'PPP') : 'Just now';
 
   return (
     <>
@@ -240,7 +254,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
               <Calendar className="h-4 w-4" />
               <span>{postDate}</span>
             </div>
-            {isAuthor && (
+            {(isAuthor || isAdmin) && (
               <Button asChild variant="outline" size="sm">
                 <Link href={`/blogs/${post.slug}/edit`}>
                   <Edit className="mr-2 h-4 w-4" /> Edit Post
@@ -264,7 +278,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
         )}
 
         <div className="prose prose-lg max-w-none text-foreground dark:prose-invert" data-color-mode="dark">
-          <MDEditor.Markdown source={post.description} style={{ whiteSpace: 'pre-wrap', background: 'transparent' }} />
+          <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
         </div>
 
         <div className="mt-8 border-t pt-6">

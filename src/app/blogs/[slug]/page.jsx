@@ -56,9 +56,24 @@ export async function generateMetadata({ params }) {
   };
 }
 
+// Helper function to serialize Firestore Timestamps
+const serializePost = (post) => {
+  if (!post) return null;
+  const serializedPost = { ...post };
+  if (post.createdAt && typeof post.createdAt.toDate === 'function') {
+    serializedPost.createdAt = post.createdAt.toDate().toISOString();
+  }
+  if (post.updatedAt && typeof post.updatedAt.toDate === 'function') {
+    serializedPost.updatedAt = post.updatedAt.toDate().toISOString();
+  }
+  return serializedPost;
+};
+
+
 export default async function BlogPostPage({ params }) {
   const { slug } = params;
-  const initialPost = await getBlogPostBySlug(slug);
+  const postData = await getBlogPostBySlug(slug);
+  const initialPost = serializePost(postData);
 
   return <BlogPostPageClient slug={slug} initialPost={initialPost} />;
 }
