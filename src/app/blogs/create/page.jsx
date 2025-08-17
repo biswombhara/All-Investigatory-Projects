@@ -191,7 +191,7 @@ export default function CreateBlogPage() {
                            <FormControl>
                              <div data-color-mode="light">
                                <MDEditor
-                                  value={field.value}
+                                  value={field.value || ''}
                                   onChange={field.onChange}
                                   preview="edit"
                                   height={300}
