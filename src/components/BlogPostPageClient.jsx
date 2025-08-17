@@ -31,14 +31,15 @@ import { Card, CardContent } from './ui/card.jsx';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
-const Comment = ({ comment, isAdmin, onDelete }) => {
-  const { toast } = useToast();
-  
-  const getInitials = (name) => {
+const getInitials = (name) => {
     if (!name) return '';
     const names = name.split(' ');
     return names.map((n) => n[0]).join('');
   };
+
+
+const Comment = ({ comment, isAdmin, onDelete }) => {
+  const { toast } = useToast();
   
   const commentDate = comment.createdAt?.toDate ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : 'Just now';
 
@@ -253,7 +254,10 @@ export default function BlogPostPageClient({ slug, initialPost }) {
               <h1 className="font-headline text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1>
               <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
+                   <Avatar className="h-6 w-6">
+                    <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
+                    <AvatarFallback>{getInitials(post.authorName)}</AvatarFallback>
+                  </Avatar>
                   <span>{post.authorName || 'Anonymous'}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -287,7 +291,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
               </div>
             )}
 
-            <div className="prose prose-lg max-w-none text-foreground dark:prose-invert" data-color-mode="dark">
+            <div className="prose prose-lg max-w-none text-foreground dark:prose-invert" >
               <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
             </div>
 
