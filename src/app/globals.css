@@ -71,3 +71,9 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .prose p {
+    color: hsl(var(--foreground));
+  }
+}
