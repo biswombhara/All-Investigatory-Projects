@@ -297,7 +297,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
         <CardContent>
           <article>
             <div className="prose prose-lg max-w-none text-foreground dark:prose-invert">
-              <MDEditor.Markdown source={post.description} />
+              <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
             </div>
 
             <div className="mt-8 border-t pt-6">
