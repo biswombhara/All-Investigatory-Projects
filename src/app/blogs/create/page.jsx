@@ -189,12 +189,14 @@ export default function CreateBlogPage() {
                             <MessageSquare className="h-4 w-4" /> Description
                           </FormLabel>
                            <FormControl>
-                             <MDEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                                preview="edit"
-                                height={300}
-                              />
+                             <div data-color-mode="light">
+                               <MDEditor
+                                  value={field.value}
+                                  onChange={field.onChange}
+                                  preview="edit"
+                                  height={300}
+                                />
+                              </div>
                            </FormControl>
                           <FormMessage />
                         </FormItem>
