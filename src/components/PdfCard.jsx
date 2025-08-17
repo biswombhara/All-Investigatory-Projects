@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from './ui/card.jsx';
 import Image from 'next/image';
+import { Eye } from 'lucide-react';
 
 export function PdfCard({ pdf }) {
   return (
@@ -26,6 +27,10 @@ export function PdfCard({ pdf }) {
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                <p>{pdf.subject}</p>
                {pdf.class && <p>{pdf.class}</p>}
+                <div className="flex items-center gap-1.5">
+                    <Eye className="h-4 w-4" />
+                    <span>{pdf.views || 0}</span>
+                </div>
             </div>
           </div>
         </div>
