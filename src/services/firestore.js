@@ -13,6 +13,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -333,8 +334,8 @@ export const saveBlogPost = async (postData, user) => {
       authorPhotoURL: user.photoURL,
       createdAt: serverTimestamp(),
       likes: [],
-      keywords: postData.keywords || '',
       views: 0,
+      keywords: postData.keywords || '',
     });
   } catch (error) {
     console.error('Error saving blog post:', error);
@@ -379,19 +380,6 @@ export const getBlogPostBySlug = async (slug) => {
   } catch (error) {
     console.error("Error fetching blog post by slug:", error);
     throw error;
-  }
-};
-
-export const incrementBlogPostViewCount = async (postId) => {
-  if (!postId) return;
-
-  const postRef = doc(db, 'blogPosts', postId);
-  try {
-    await updateDoc(postRef, {
-      views: increment(1)
-    });
-  } catch (error) {
-    console.error("Could not increment blog post view count:", error.message);
   }
 };
 
@@ -492,3 +480,18 @@ export const getAllCommentsForPost = async (postId) => {
     return [];
   }
 };
+
+export const incrementBlogPostViewCount = async (postId) => {
+  if (!postId) return;
+
+  const postRef = doc(db, 'blogPosts', postId);
+  try {
+    await updateDoc(postRef, {
+      views: increment(1)
+    });
+  } catch (error) {
+    console.error("Could not increment blog post view count:", error.message);
+  }
+};
+
+    
