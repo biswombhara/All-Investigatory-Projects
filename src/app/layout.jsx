@@ -23,9 +23,11 @@ export const metadata = {
   description: description,
   keywords: keywords,
   icons: {
-    icon: imageUrl,
+    icon: {
+      url: imageUrl,
+      href: imageUrl,
+    },
   },
-   metadataBase: new URL('https://allinvestigatoryprojects.netlify.app'),
   openGraph: {
     title: title,
     description: description,
