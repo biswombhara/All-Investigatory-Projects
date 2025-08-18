@@ -5,10 +5,10 @@ import { Header } from '../components/layout/Header.jsx';
 import { Footer } from '../components/layout/Footer.jsx';
 import { Toaster } from '../components/ui/toaster.jsx';
 import React from 'react';
-import { Loader } from '../components/Loader.jsx';
 import { AuthProvider } from '../context/AuthContext.jsx';
-import { LoadingProvider, LoadingContext } from '../context/LoadingContext.jsx';
+import { LoadingProvider } from '../context/LoadingContext.jsx';
 import { ThemeProvider } from 'next-themes';
+import { AppContent } from '../components/AppContent.jsx';
 
 const title = 'All Investigatory Projects';
 const description =
@@ -46,23 +46,6 @@ export const metadata = {
     images: [imageUrl],
   },
 };
-
-
-function AppContent({ children }) {
-  const { loading } = React.useContext(LoadingContext);
-
-  return (
-    <>
-      {loading && <Loader />}
-      <div className="relative flex min-h-screen flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </div>
-      <Toaster />
-    </>
-  );
-}
 
 export default function RootLayout({
   children,
