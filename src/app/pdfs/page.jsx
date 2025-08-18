@@ -40,7 +40,7 @@ const allClassesList = [
     'School ( 4th - 8th )',
 ];
 
-const sortOptions = ['Latest uploaded', 'A-Z'];
+const sortOptions = ['Latest uploaded', 'Popularity', 'A-Z'];
 
 
 export default function PdfsPage() {
@@ -82,6 +82,9 @@ export default function PdfsPage() {
       return matchesSubject && matchesClass && matchesSearch;
     })
     .sort((a, b) => {
+      if (sortOption === 'Popularity') {
+        return (b.views || 0) - (a.views || 0);
+      }
       if (sortOption === 'A-Z') {
         return a.title.localeCompare(b.title);
       }
