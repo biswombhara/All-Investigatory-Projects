@@ -1,0 +1,94 @@
+
+rules_version = '2';
+
+// The admin's email address, which gets full access.
+// IMPORTANT: Replace with your actual admin email if it's different.
+function adminEmail() {
+  return "allinvestigatoryprojects@gmail.com";
+}
+
+// Check if a user is authenticated
+function isSignedIn() {
+  return request.auth != null;
+}
+
+// Check if the user is the owner of a document
+function isOwner(userId) {
+  return request.auth.uid == userId;
+}
+
+// Check if the user is an admin
+function isAdmin() {
+  return isSignedIn() && request.auth.token.email == adminEmail();
+}
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can create their own profile and only update their own.
+    // Public read is denied.
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // PDFs are public to read, but only admins can create, update or delete them.
+    match /pdfs/{pdfId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Reviews are public to read.
+    // Logged-in users can create reviews. Admins can delete them.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+    
+    // Blog posts are public to read.
+    // Logged-in users can like posts and add comments.
+    // The author or an admin can edit or delete a post.
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isSignedIn();
+        allow delete: if isAdmin();
+      }
+    }
+
+    // All request/submission types are write-only for users, and admin-readable.
+    match /pdfRequests/{requestId} {
+      allow read: if isOwner(resource.data.requesterId) || isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /copyrightRequests/{requestId} {
+      allow read: if isOwner(resource.data.requesterId) || isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /contactSubmissions/{submissionId} {
+      allow read: if isOwner(resource.data.senderId) || isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+    
+    // Visitor counter should be readable by all, but only incrementable.
+    match /siteStats/visitorCounter {
+       allow read: if true;
+       // Allow updates only if the 'count' is being incremented by 1.
+       allow write: if request.resource.data.count == resource.data.count + 1 || isAdmin();
+    }
+  }
+}
