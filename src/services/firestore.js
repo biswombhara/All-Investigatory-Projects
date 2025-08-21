@@ -14,6 +14,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -39,6 +40,17 @@ export const saveUser = async (user) => {
     } catch (error) {
       console.error("Error saving user to Firestore: ", error);
     }
+  }
+};
+
+export const getAllUsers = async () => {
+  try {
+    const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
   }
 };
 
