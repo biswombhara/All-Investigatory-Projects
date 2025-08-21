@@ -23,10 +23,9 @@ export const metadata = {
   description: description,
   keywords: keywords,
   icons: {
-    icon: {
-      url: imageUrl,
-      href: imageUrl,
-    },
+    icon: imageUrl,
+    shortcut: imageUrl,
+    apple: imageUrl,
   },
   openGraph: {
     title: title,
