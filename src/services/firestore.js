@@ -15,7 +15,8 @@
 
 
 
-import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch } from 'firebase/firestore';
+
+import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -506,4 +507,25 @@ export const incrementBlogPostViewCount = async (postId) => {
   }
 };
 
+export const getRelatedBlogPosts = async (currentPostId, authorId) => {
+  if (!currentPostId || !authorId) return [];
+  try {
+    const q = query(
+      collection(db, 'blogPosts'),
+      where('authorId', '==', authorId),
+      where('__name__', '!=', currentPostId), // Exclude the current post
+      orderBy('__name__'), // Cannot have inequality on a field used for ordering
+      limit(2)
+    );
+    const querySnapshot = await getDocs(q);
+    // As we can't order by date, we'll manually sort them afterwards.
+    // This is a Firestore limitation when using inequality filters.
+    const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return posts.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+
+  } catch (error) {
+    console.error("Error fetching related blog posts:", error);
+    return [];
+  }
+};
     

@@ -2,11 +2,11 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, incrementBlogPostViewCount } from '../services/firestore.js';
+import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, incrementBlogPostViewCount, getRelatedBlogPosts } from '../services/firestore.js';
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { AuthContext } from '../context/AuthContext.jsx';
@@ -35,7 +35,52 @@ const getInitials = (name) => {
     if (!name) return '';
     const names = name.split(' ');
     return names.map((n) => n[0]).join('');
-  };
+};
+
+const RelatedPosts = ({ currentPostId, authorId }) => {
+  const [relatedPosts, setRelatedPosts] = useState([]);
+
+  useEffect(() => {
+    if (currentPostId && authorId) {
+      getRelatedBlogPosts(currentPostId, authorId).then(setRelatedPosts);
+    }
+  }, [currentPostId, authorId]);
+
+  if (relatedPosts.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-16 border-t pt-8">
+      <h2 className="font-headline text-2xl font-bold mb-6">More From This Author</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {relatedPosts.map((post) => (
+          <Link href={`/blogs/${post.slug}`} key={post.id}>
+            <Card className="group flex flex-col overflow-hidden transition-shadow duration-300 hover:shadow-xl h-full">
+              {post.coverImage && (
+                <div className="relative aspect-video w-full">
+                  <Image
+                    src={post.coverImage}
+                    alt={post.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    data-ai-hint="blog cover"
+                  />
+                </div>
+              )}
+              <CardContent className="flex flex-col flex-grow p-4">
+                <h3 className="font-headline text-lg font-bold group-hover:text-primary flex-grow line-clamp-2">{post.title}</h3>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  {format(post.createdAt.toDate(), 'PPP')}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 
 const Comment = ({ comment, isAdmin, onDelete }) => {
@@ -335,6 +380,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
                   )}
               </div>
             </div>
+            <RelatedPosts currentPostId={post.id} authorId={post.authorId} />
           </article>
         </CardContent>
       </Card>
