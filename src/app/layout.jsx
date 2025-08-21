@@ -1,9 +1,6 @@
 
 import './globals.css';
 import { cn } from '../lib/utils.js';
-import { Header } from '../components/layout/Header.jsx';
-import { Footer } from '../components/layout/Footer.jsx';
-import { Toaster } from '../components/ui/toaster.jsx';
 import React from 'react';
 import { AuthProvider } from '../context/AuthContext.jsx';
 import { LoadingProvider } from '../context/LoadingContext.jsx';
