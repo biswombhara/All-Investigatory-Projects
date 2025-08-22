@@ -336,7 +336,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
               </div>
             )}
 
-            <div className="prose md:prose-lg max-w-none text-foreground dark:prose-invert" >
+            <div className="prose text-base md:text-lg max-w-none text-foreground dark:prose-invert" >
               <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
             </div>
 
