@@ -297,7 +297,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
           <article>
             <header className="mb-8">
               <h1 className="font-headline text-4xl font-bold leading-tight md:text-5xl">{post.title}</h1>
-              <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground">
+              <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                    <Avatar className="h-6 w-6">
                     <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
@@ -336,7 +336,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
               </div>
             )}
 
-            <div className="prose text-base md:text-lg max-w-none text-foreground dark:prose-invert" >
+            <div className="prose max-w-none text-foreground dark:prose-invert" >
               <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
             </div>
 
