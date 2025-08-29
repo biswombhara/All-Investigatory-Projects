@@ -1,3 +1,4 @@
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -171,7 +172,7 @@ export const incrementVisitorCount = async () => {
   } catch (error) {
     // If the document doesn't exist, create it.
     if (error.code === 'not-found') {
-      await setDoc(statsRef, { count: 2000 }); // Starting from a base number
+      await setDoc(statsRef, { count: 0 }); // Starting from a base number
     } else {
       console.error('Could not increment visitor count:', error);
     }
@@ -187,8 +188,8 @@ export const listenToVisitorCount = (callback) => {
     } else {
       // If the document doesn't exist, you might want to initialize it
       // or handle the state appropriately (e.g., show 0 or a loading state).
-       setDoc(statsRef, { count: 2000 }); // Starting from a base number
-       callback(2000);
+       setDoc(statsRef, { count: 0 }); // Starting from a base number
+       callback(0);
     }
   }, (error) => {
       console.error('Error listening to visitor count:', error);
