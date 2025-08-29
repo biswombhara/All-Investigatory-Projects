@@ -6,7 +6,6 @@ import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getC
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { AuthContext } from '../context/AuthContext.jsx';
@@ -73,7 +72,7 @@ const RelatedPosts = ({ currentPostId, authorId }) => {
               <CardContent className="flex flex-col flex-grow p-4">
                 <h3 className="font-headline text-lg font-bold group-hover:text-primary flex-grow line-clamp-2">{post.title}</h3>
                 <div className="mt-2 text-sm text-muted-foreground">
-                  {format(post.createdAt.toDate(), 'PPP')}
+                  {post.createdAt?.toDate ? format(post.createdAt.toDate(), 'PPP') : ''}
                 </div>
               </CardContent>
             </Card>
@@ -155,7 +154,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
       
       try {
         setLoading(true);
-
+        
         // Safely increment view count via server action
         if (initialPost?.id) {
           await incrementBlogPostView(initialPost.id);
@@ -186,7 +185,14 @@ export default function BlogPostPageClient({ slug, initialPost }) {
       }
     };
     
-    fetchPostData();
+    // Only run if we have an initial post, to avoid running on initial render with no data
+    if(initialPost?.id) {
+        fetchPostData();
+    } else {
+        setLoading(false);
+        if (!slug) setError("No slug provided.");
+        else setError("Blog post not found.");
+    }
   }, [slug, initialPost?.id]);
 
   const handleLike = async () => {
@@ -212,7 +218,6 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     try {
         await addCommentToPost(post.id, { text: newComment }, user);
         setNewComment('');
-        // Refresh comments
         const fetchedComments = await getCommentsForPost(post.id);
         setComments(fetchedComments);
     } catch (error) {
@@ -226,7 +231,6 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     if (!post) return;
     try {
       await deleteComment(post.id, commentId);
-      // Refresh comments list
       setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
     } catch (error) {
       console.error("Failed to delete comment:", error);
@@ -239,7 +243,6 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     const postDate = post.createdAt ? (typeof post.createdAt === 'string' ? post.createdAt : new Date(post.createdAt.seconds * 1000).toISOString()) : new Date().toISOString();
     const modifiedDate = post.updatedAt ? (typeof post.updatedAt === 'string' ? post.updatedAt : new Date(post.updatedAt.seconds * 1000).toISOString()) : postDate;
 
-    // Combine title, author, and custom keywords
     const fullKeywords = [
       post.title,
       post.authorName,
