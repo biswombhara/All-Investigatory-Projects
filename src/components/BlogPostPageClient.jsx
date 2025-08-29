@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts } from '../services/firestore.js';
+import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts, incrementBlogPostViewCount } from '../services/firestore.js';
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye } from 'lucide-react';
@@ -136,7 +136,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPost);
   const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
 
@@ -146,39 +146,43 @@ export default function BlogPostPageClient({ slug, initialPost }) {
 
   useEffect(() => {
     const fetchPostData = async () => {
-      if (slug) {
-        try {
-          // Re-fetch post data to get the latest view count and ensure consistency
-          const fetchedPostData = await getBlogPostBySlug(slug);
-          if (fetchedPostData) {
-             const serializedPost = { ...fetchedPostData };
-             if (fetchedPostData.createdAt && typeof fetchedPostData.createdAt.toDate === 'function') {
-                serializedPost.createdAt = fetchedPostData.createdAt.toDate().toISOString();
+      if (!slug) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        if (initialPost?.id) {
+          await incrementBlogPostViewCount(initialPost.id);
+        }
+        
+        const fetchedPostData = await getBlogPostBySlug(slug);
+        if (fetchedPostData) {
+            const serializedPost = { ...fetchedPostData };
+            if (fetchedPostData.createdAt && typeof fetchedPostData.createdAt.toDate === 'function') {
+              serializedPost.createdAt = fetchedPostData.createdAt.toDate().toISOString();
             }
             if (fetchedPostData.updatedAt && typeof fetchedPostData.updatedAt.toDate === 'function') {
-                serializedPost.updatedAt = fetchedPostData.updatedAt.toDate().toISOString();
+              serializedPost.updatedAt = fetchedPostData.updatedAt.toDate().toISOString();
             }
             setPost(serializedPost);
 
             const fetchedComments = await getCommentsForPost(fetchedPostData.id);
             setComments(fetchedComments);
-          } else {
-            setError('Blog post not found.');
-          }
-        } catch (err) {
-           setError('Failed to load blog post.');
-           console.error(err);
-        } finally {
-          setLoading(false);
+        } else {
+          setError('Blog post not found.');
         }
-      } else {
+      } catch (err) {
+          setError('Failed to load blog post.');
+          console.error(err);
+      } finally {
         setLoading(false);
       }
     };
     
     fetchPostData();
-
-  }, [slug]);
+  }, [slug, initialPost?.id]);
 
   const handleLike = async () => {
     if (!user || !post) return;
@@ -261,7 +265,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     };
   };
 
-  if (loading && !initialPost) {
+  if (loading) {
     return <Loader />;
   }
 
