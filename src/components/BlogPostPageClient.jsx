@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts, incrementBlogPostViewCount } from '../services/firestore.js';
+import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts } from '../services/firestore.js';
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye } from 'lucide-react';
@@ -28,6 +28,8 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog.jsx';
 import { Card, CardContent } from './ui/card.jsx';
+import { incrementBlogPostView } from '../actions/update-views.js';
+
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -143,7 +145,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   const hasLiked = post?.likes?.includes(user?.uid);
   const isAuthor = post?.authorId === user?.uid;
   const isAdmin = user && user.email === ADMIN_EMAIL;
-
+  
   useEffect(() => {
     const fetchPostData = async () => {
       if (!slug) {
@@ -153,11 +155,14 @@ export default function BlogPostPageClient({ slug, initialPost }) {
       
       try {
         setLoading(true);
+
+        // Safely increment view count via server action
         if (initialPost?.id) {
-          await incrementBlogPostViewCount(initialPost.id);
+          await incrementBlogPostView(initialPost.id);
         }
         
         const fetchedPostData = await getBlogPostBySlug(slug);
+
         if (fetchedPostData) {
             const serializedPost = { ...fetchedPostData };
             if (fetchedPostData.createdAt && typeof fetchedPostData.createdAt.toDate === 'function') {

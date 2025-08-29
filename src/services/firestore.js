@@ -447,19 +447,6 @@ export const getAllCommentsForPost = async (postId) => {
   }
 };
 
-export const incrementBlogPostViewCount = async (postId) => {
-  if (!postId) return;
-
-  const postRef = doc(db, 'blogPosts', postId);
-  try {
-    await updateDoc(postRef, {
-      views: increment(1)
-    });
-  } catch (error) {
-    console.error("Could not increment blog post view count:", error.message);
-  }
-};
-
 export const getRelatedBlogPosts = async (currentPostId, authorId) => {
   if (!currentPostId || !authorId) return [];
   try {
