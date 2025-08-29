@@ -1,5 +1,5 @@
 
-import { getBlogPostBySlug } from '../../../services/firestore.js';
+import { getBlogPostBySlug, incrementBlogPostViewCount } from '../../../services/firestore.js';
 import BlogPostPageClient from '../../../components/BlogPostPageClient.jsx';
 
 export async function generateMetadata({ params }) {
@@ -73,6 +73,9 @@ const serializePost = (post) => {
 export default async function BlogPostPage({ params }) {
   const { slug } = params;
   const postData = await getBlogPostBySlug(slug);
+  
+  // We no longer need to increment views here, as it's handled in the client component.
+  
   const initialPost = serializePost(postData);
 
   return <BlogPostPageClient slug={slug} initialPost={initialPost} />;
