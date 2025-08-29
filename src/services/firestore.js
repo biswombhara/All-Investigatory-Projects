@@ -1,48 +1,7 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-
-
-export const saveUser = async (user) => {
-  if (!user) return;
-
-  const userRef = doc(db, 'users', user.uid);
-  const userSnap = await getDoc(userRef);
-
-  if (!userSnap.exists()) {
-    const { displayName, email, photoURL, uid } = user;
-    try {
-      await setDoc(userRef, {
-        uid,
-        displayName,
-        email,
-        photoURL,
-        createdAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error("Error saving user to Firestore: ", error);
-    }
-  }
-};
 
 export const getAllUsers = async () => {
   try {
@@ -54,18 +13,6 @@ export const getAllUsers = async () => {
     return [];
   }
 };
-
-export const updateUserInFirestore = async (userId, data) => {
-  if (!userId) return;
-  const userRef = doc(db, 'users', userId);
-  try {
-    await updateDoc(userRef, data);
-  } catch (error) {
-    console.error("Error updating user in Firestore: ", error);
-    throw error;
-  }
-};
-
 
 export const savePdfRequest = async (requestData, user) => {
   if (!user) throw new Error('User must be authenticated to make a request.');
