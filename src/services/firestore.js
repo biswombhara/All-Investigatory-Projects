@@ -2,6 +2,7 @@
 
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { saveUser, updateUserInFirestore } from './auth.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -106,13 +107,18 @@ export const incrementPdfViewCount = async (pdfId) => {
 
   const pdfRef = doc(db, 'pdfs', pdfId);
   try {
+    // This will reset the view count to 1 for the current view.
+    // This is a temporary measure to reset all view counts to 0 over time.
     await updateDoc(pdfRef, {
-      views: increment(1)
+      views: 1
     });
   } catch (error) {
-    // It's okay if this fails, e.g., document doesn't exist yet.
-    // The main functionality of viewing the PDF shouldn't be blocked.
-    console.error("Could not increment view count:", error.message);
+    if (error.code === 'not-found') {
+        // If the document or the 'views' field doesn't exist, create it.
+        await setDoc(pdfRef, { views: 1 }, { merge: true });
+    } else {
+        console.error("Could not set view count:", error.message);
+    }
   }
 };
 
@@ -167,12 +173,13 @@ export const saveContactSubmission = async (formData, user) => {
 export const resetAndIncrementVisitorCount = async () => {
   const statsRef = doc(db, 'siteStats', 'visitorCounter');
   try {
-    // Force set the count to 1. This resets and increments in one operation.
+    // This logic will effectively reset the counter to 1 for the first visitor of a new session cycle.
     await setDoc(statsRef, { count: 1 });
   } catch (error) {
-    console.error('Could not reset visitor count:', error);
+    console.error('Could not reset and increment visitor count:', error);
   }
 };
+
 
 export const incrementVisitorCount = async () => {
   const statsRef = doc(db, 'siteStats', 'visitorCounter');
