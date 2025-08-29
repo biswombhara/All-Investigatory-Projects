@@ -2,7 +2,6 @@
 
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
-import { saveUser, updateUserInFirestore } from './auth.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -169,17 +168,6 @@ export const saveContactSubmission = async (formData, user) => {
     throw error;
   }
 };
-
-export const resetAndIncrementVisitorCount = async () => {
-  const statsRef = doc(db, 'siteStats', 'visitorCounter');
-  try {
-    // This logic will effectively reset the counter to 1 for the first visitor of a new session cycle.
-    await setDoc(statsRef, { count: 1 });
-  } catch (error) {
-    console.error('Could not reset and increment visitor count:', error);
-  }
-};
-
 
 export const incrementVisitorCount = async () => {
   const statsRef = doc(db, 'siteStats', 'visitorCounter');
