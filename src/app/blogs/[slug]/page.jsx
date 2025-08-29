@@ -73,8 +73,11 @@ const serializePost = (post) => {
 export default async function BlogPostPage({ params }) {
   const { slug } = params;
   const postData = await getBlogPostBySlug(slug);
-  
-  // We no longer need to increment views here, as it's handled in the client component.
+
+  // Increment view count on the server for every visit
+  if (postData) {
+    await incrementBlogPostViewCount(postData.id);
+  }
   
   const initialPost = serializePost(postData);
 

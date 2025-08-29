@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, incrementBlogPostViewCount, getRelatedBlogPosts } from '../services/firestore.js';
+import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts } from '../services/firestore.js';
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye } from 'lucide-react';
@@ -148,11 +148,8 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     const fetchPostData = async () => {
       if (slug) {
         try {
-          // Note: initialPost is serialized, but we need the real ID for the increment function.
-          if (initialPost?.id) {
-            await incrementBlogPostViewCount(initialPost.id);
-          }
-          const fetchedPostData = await getBlogPostBySlug(slug); // Re-fetch to get the latest view count
+          // Re-fetch post data to get the latest view count and ensure consistency
+          const fetchedPostData = await getBlogPostBySlug(slug);
           if (fetchedPostData) {
              const serializedPost = { ...fetchedPostData };
              if (fetchedPostData.createdAt && typeof fetchedPostData.createdAt.toDate === 'function') {
@@ -181,7 +178,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     
     fetchPostData();
 
-  }, [slug, initialPost?.id]);
+  }, [slug]);
 
   const handleLike = async () => {
     if (!user || !post) return;
@@ -264,7 +261,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
     };
   };
 
-  if (loading) {
+  if (loading && !initialPost) {
     return <Loader />;
   }
 
