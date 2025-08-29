@@ -1,4 +1,5 @@
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
@@ -163,6 +164,16 @@ export const saveContactSubmission = async (formData, user) => {
   }
 };
 
+export const resetAndIncrementVisitorCount = async () => {
+  const statsRef = doc(db, 'siteStats', 'visitorCounter');
+  try {
+    // Force set the count to 1. This resets and increments in one operation.
+    await setDoc(statsRef, { count: 1 });
+  } catch (error) {
+    console.error('Could not reset visitor count:', error);
+  }
+};
+
 export const incrementVisitorCount = async () => {
   const statsRef = doc(db, 'siteStats', 'visitorCounter');
   try {
@@ -172,7 +183,7 @@ export const incrementVisitorCount = async () => {
   } catch (error) {
     // If the document doesn't exist, create it.
     if (error.code === 'not-found') {
-      await setDoc(statsRef, { count: 0 }); // Starting from a base number
+      await setDoc(statsRef, { count: 1 }); // Start at 1 for the current user
     } else {
       console.error('Could not increment visitor count:', error);
     }

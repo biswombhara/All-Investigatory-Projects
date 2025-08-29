@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useContext } from 'react';
 import { Users } from 'lucide-react';
-import { listenToVisitorCount, incrementVisitorCount } from '../services/firestore.js';
+import { listenToVisitorCount, resetAndIncrementVisitorCount } from '../services/firestore.js';
 import { AuthContext } from '../context/AuthContext.jsx';
 
 
@@ -17,7 +17,7 @@ export function VisitorCounter() {
   useEffect(() => {
     // Increment count only once per session
     if (!sessionStorage.getItem('sessionVisited')) {
-      incrementVisitorCount();
+      resetAndIncrementVisitorCount(); // Use the new reset function
       sessionStorage.setItem('sessionVisited', 'true');
     }
 
