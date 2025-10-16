@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useEffect } from 'react';
@@ -44,7 +45,8 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
-    accessToken,
+    // accessToken is removed from here to avoid using a stale token.
+    // Components should get a fresh token when needed.
     signIn, // Expose the new signIn function
     reloadUser,
   };
@@ -56,3 +58,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+    
