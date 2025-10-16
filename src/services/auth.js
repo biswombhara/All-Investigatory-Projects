@@ -1,5 +1,5 @@
 
-import { GoogleAuthProvider, signInWithPopup, signOut, updateProfile, getRedirectResult, reauthenticateWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, updateProfile, getRedirectResult, reauthenticateWithPopup, signInWithRedirect } from 'firebase/auth';
 import { auth, db } from '../lib/firebase.js';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 
@@ -43,27 +43,12 @@ export const updateUserInFirestore = async (userId, data) => {
 
 export const signInWithGoogle = async () => {
   try {
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const accessToken = credential.accessToken;
-    
-    await saveUser(user);
-    return { user: result.user, accessToken };
+    // We use signInWithRedirect which is more reliable and avoids popup blockers.
+    await signInWithRedirect(auth, provider);
+    // The rest of the logic (getting user, token, and saving) will be handled 
+    // by the onAuthStateChanged listener and getRedirectResult in the AuthProvider.
   } catch (error) {
-    if (error.code === 'auth/popup-closed-by-user') {
-      return null;
-    }
-    
-    console.error("Error signing in with Google: ", error);
-    if (error.code === 'auth/unauthorized-domain') {
-      const currentDomain = window.location.hostname;
-      console.error(`This domain (${currentDomain}) is not authorized for OAuth operations. Please visit your Firebase console, go to Authentication > Settings > Authorized domains, and add this exact domain.`);
-    }
+    console.error("Error starting sign in with Google redirect: ", error);
     throw error;
   }
 };
@@ -80,7 +65,8 @@ export const getGoogleOAuthToken = async () => {
 
   try {
     // Re-authenticating with a popup is a reliable way to get a fresh token and
-    // handle expired credentials.
+    // handle expired credentials. For this specific action, a popup is generally
+    // acceptable as it's in response to a direct user action (upload).
     const result = await reauthenticateWithPopup(auth.currentUser, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     return credential.accessToken;

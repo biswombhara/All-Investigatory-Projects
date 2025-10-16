@@ -2,8 +2,8 @@
 'use client';
 
 import React, { createContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithGoogle } from '../services/auth.js';
-import { GoogleAuthProvider } from 'firebase/auth';
+import { onAuthStateChanged, signInWithGoogle, saveUser } from '../services/auth.js';
+import { GoogleAuthProvider, getRedirectResult } from 'firebase/auth';
 import { auth } from '../lib/firebase.js';
 
 export const AuthContext = createContext();
@@ -16,24 +16,34 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged((user) => {
       setUser(user);
-      // When auth state changes, we don't get a new OAuth token automatically.
-      // It's best captured at sign-in.
-      if (!user) {
+       if (!user) {
         setAccessToken(null);
       }
       setLoading(false);
     });
 
+    // Check for redirect result
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result) {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          setAccessToken(credential.accessToken);
+          await saveUser(result.user);
+        }
+      })
+      .catch((error) => {
+        console.error("Error getting redirect result: ", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
     return () => unsubscribe();
   }, []);
   
-  // This sign-in wrapper is crucial. It calls the original signInWithGoogle,
-  // then captures the accessToken from the result and stores it in our state.
   const signIn = async () => {
-    const result = await signInWithGoogle();
-    if (result && result.accessToken) {
-       setAccessToken(result.accessToken);
-    }
+    // This now just initiates the redirect.
+    await signInWithGoogle();
   };
   
   const reloadUser = async () => {
@@ -45,9 +55,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
-    // accessToken is removed from here to avoid using a stale token.
-    // Components should get a fresh token when needed.
-    signIn, // Expose the new signIn function
+    signIn,
     reloadUser,
   };
 
