@@ -34,10 +34,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // PDFs are public to read, but only admins can create, update or delete them.
+    // PDFs are public to read. Any signed-in user can create them.
+    // Only admins can update or delete them.
     match /pdfs/{pdfId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
     }
 
     // Reviews are public to read.
