@@ -40,7 +40,6 @@ import { savePdfDocument } from '../../services/firestore.js';
 import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2, School } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
-import { getGoogleOAuthToken } from '../../services/auth.js';
 
 
 const formSchema = z.object({
@@ -76,7 +75,7 @@ const classes = [
 ];
 
 export default function UploadPdfPage() {
-  const { user, signIn } = useContext(AuthContext);
+  const { user, signIn, accessToken } = useContext(AuthContext);
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
@@ -100,18 +99,20 @@ export default function UploadPdfPage() {
       });
       return;
     }
+
+    if (!accessToken) {
+        setError({
+            title: 'Authentication Token Missing',
+            message: 'Could not get authentication for Google Drive. Please try signing in again to grant permission.',
+        });
+        return;
+    }
     
     setIsUploading(true);
     showLoader();
     setError(null);
 
     try {
-      // Get a fresh access token right before the upload
-      const accessToken = await getGoogleOAuthToken();
-      if (!accessToken) {
-        throw new Error('Could not obtain Google Drive authentication token. Please try signing in again.');
-      }
-
       const driveFile = await uploadPdfToGoogleDrive(values.file, values.title, accessToken);
       
       const pdfData = {
@@ -146,7 +147,7 @@ export default function UploadPdfPage() {
     try {
       await signIn();
     } catch (error) {
-       if (error.code !== 'auth/popup-closed-by-user') {
+       if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
          console.error('Login failed:', error);
          setError({
            title: 'Login Failed',

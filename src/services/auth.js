@@ -1,4 +1,5 @@
 
+
 import { GoogleAuthProvider, signInWithPopup, signOut, updateProfile, getRedirectResult, reauthenticateWithPopup, signInWithRedirect } from 'firebase/auth';
 import { auth, db } from '../lib/firebase.js';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
@@ -52,34 +53,6 @@ export const signInWithGoogle = async () => {
     throw error;
   }
 };
-
-/**
- * Gets a fresh OAuth access token for Google services.
- * This should be called before making an API call to Google Drive.
- * It forces a re-authentication if necessary to get a valid token.
- */
-export const getGoogleOAuthToken = async () => {
-  if (!auth.currentUser) {
-    throw new Error("User is not signed in.");
-  }
-
-  try {
-    // Re-authenticating with a popup is a reliable way to get a fresh token and
-    // handle expired credentials. For this specific action, a popup is generally
-    // acceptable as it's in response to a direct user action (upload).
-    const result = await reauthenticateWithPopup(auth.currentUser, provider);
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    return credential.accessToken;
-  } catch (error) {
-    console.error("Error getting fresh Google OAuth token:", error);
-    if (error.code === 'auth/popup-closed-by-user') {
-        return null; // User cancelled the process
-    }
-    // You could throw a more specific error or let the original one bubble up
-    throw new Error('Failed to obtain authentication token for Google Drive.');
-  }
-};
-
 
 export const signOutUser = () => {
   return signOut(auth);

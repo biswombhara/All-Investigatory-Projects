@@ -19,22 +19,27 @@ export const AuthProvider = ({ children }) => {
        if (!user) {
         setAccessToken(null);
       }
-      setLoading(false);
+      // Keep loading until we have checked for a redirect result.
     });
 
-    // Check for redirect result
+    // Check for redirect result on initial load.
     getRedirectResult(auth)
       .then(async (result) => {
         if (result) {
+          // This is the success case after a redirect.
           const credential = GoogleAuthProvider.credentialFromResult(result);
-          setAccessToken(credential.accessToken);
+          if (credential) {
+            setAccessToken(credential.accessToken);
+          }
           await saveUser(result.user);
+          setUser(result.user); // Explicitly set user from redirect result
         }
       })
       .catch((error) => {
         console.error("Error getting redirect result: ", error);
       })
       .finally(() => {
+        // Only stop loading after we've processed the redirect.
         setLoading(false);
       });
 
@@ -57,6 +62,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     signIn,
     reloadUser,
+    accessToken, // Expose the access token
   };
 
 
@@ -66,5 +72,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-    
