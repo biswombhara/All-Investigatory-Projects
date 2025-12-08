@@ -6,7 +6,6 @@ import { AuthProvider } from '../context/AuthContext.jsx';
 import { LoadingProvider } from '../context/LoadingContext.jsx';
 import { ThemeProvider } from '../components/layout/ThemeProvider.jsx';
 import { AppContent } from '../components/AppContent.jsx';
-import { GA_TRACKING_ID } from '../lib/gtag.js';
 
 const title = 'All Investigatory Projects';
 const description =
