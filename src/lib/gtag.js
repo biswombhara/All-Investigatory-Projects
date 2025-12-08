@@ -1,10 +1,9 @@
 
-// This value is now hardcoded in layout.jsx, but we keep the file for the helper functions.
-export const GA_TRACKING_ID = 'G-XXXXXXXXXX';
+export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/pages
 export const pageview = (url) => {
-  if (typeof window.gtag !== 'function') {
+  if (typeof window.gtag !== 'function' || !GA_TRACKING_ID) {
     return;
   }
   window.gtag('config', GA_TRACKING_ID, {
@@ -14,7 +13,7 @@ export const pageview = (url) => {
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/events
 export const event = ({ action, category, label, value }) => {
-   if (typeof window.gtag !== 'function') {
+   if (typeof window.gtag !== 'function' || !GA_TRACKING_ID) {
     return;
   }
   window.gtag('event', action, {

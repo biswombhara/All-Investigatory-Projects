@@ -65,10 +65,10 @@ export default function RootLayout({
           crossOrigin="anonymous"
         ></script>
         
-        {/* Google Analytics Scripts - IMPORTANT: Replace G-XXXXXXXXXX with your real Measurement ID */}
+        {/* Google Analytics Scripts - Loaded from environment variable */}
         <script
           async
-          src={`https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX`}
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
         />
         <script
           dangerouslySetInnerHTML={{
@@ -76,7 +76,7 @@ export default function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-XXXXXXXXXX', {
+              gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
                 page_path: window.location.pathname,
               });
             `,
