@@ -2,6 +2,7 @@
 const nextConfig = {
   env: {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID,
   },
   images: {
     remotePatterns: [
