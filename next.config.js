@@ -1,8 +1,8 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-    NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID,
   },
   images: {
     remotePatterns: [
@@ -19,7 +19,7 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https://',
         hostname: 'yt3.googleusercontent.com',
         port: '',
         pathname: '/**',

@@ -1,4 +1,6 @@
-export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+// This value is now hardcoded in layout.jsx, but we keep the file for the helper functions.
+export const GA_TRACKING_ID = 'G-XXXXXXXXXX';
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/pages
 export const pageview = (url) => {
