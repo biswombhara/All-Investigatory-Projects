@@ -6,6 +6,7 @@ import { AuthProvider } from '../context/AuthContext.jsx';
 import { LoadingProvider } from '../context/LoadingContext.jsx';
 import { ThemeProvider } from '../components/layout/ThemeProvider.jsx';
 import { AppContent } from '../components/AppContent.jsx';
+import { GA_TRACKING_ID } from '../lib/gtag.js';
 
 const title = 'All Investigatory Projects';
 const description =
@@ -57,12 +58,30 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
-        {/* AdSense Script - IMPORTANT: Replace ca-pub-XXXXXXXXXXXXXXXX with your real publisher ID */}
+        {/* AdSense Script */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
           crossOrigin="anonymous"
         ></script>
+        
+        {/* Google Analytics Scripts - IMPORTANT: Replace G-XXXXXXXXXX with your real Measurement ID */}
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-XXXXXXXXXX', {
+                page_path: window.location.pathname,
+              });
+            `,
+          }}
+        />
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased')}>
         <ThemeProvider
