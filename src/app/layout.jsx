@@ -4,7 +4,7 @@ import { cn } from '../lib/utils.js';
 import React from 'react';
 import { AuthProvider } from '../context/AuthContext.jsx';
 import { LoadingProvider } from '../context/LoadingContext.jsx';
-import { ThemeProvider } from 'next-themes';
+import { ThemeProvider } from '../components/layout/ThemeProvider.jsx';
 import { AppContent } from '../components/AppContent.jsx';
 
 const title = 'All Investigatory Projects';
