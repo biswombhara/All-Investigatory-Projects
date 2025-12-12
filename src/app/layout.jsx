@@ -11,7 +11,7 @@ const title = 'All Investigatory Projects';
 const description =
   'Download free project PDFs of physics, chemistry, biology, mathematics, english and many more. Class 6th to 12th and for college projects also.';
 const keywords =
-  'Biswombhara Patra, all investigatory projects, investigatory projects, physics investigatory project, chemistry investigatory project, biology investigatory project, mathematics investigatory project, computer science investigatory project, english investigatory project, class 12 physics project file pdf download, class 12 investigatory project, class 12 investigatory project chemistry';
+  'all investigatory projects, class 12 projects, Biswombhara Patra, class 12 physics project, class 12 chemistry project, class 12 biology project, physics investigatory project, chemistry investigatory project, biology investigatory project, mathematics investigatory project, computer science investigatory project, english investigatory project, class 12 physics project file pdf download, class 12 investigatory project, class 12 investigatory project chemistry';
 
 
 export const metadata = {
@@ -81,7 +81,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={cn('min-h-screen bg-background font-body antialiased')}>
+      <body className={cn('min-h-screen bg-background font-body antialiased')} suppressHydrationWarning={true}>
         <ThemeProvider
             attribute="class"
             defaultTheme="light"
