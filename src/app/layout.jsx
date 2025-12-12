@@ -10,7 +10,7 @@ import { AppContent } from '../components/AppContent.jsx';
 const title = 'All Investigatory Projects';
 const description =
   'Download free project PDFs of physics, chemistry, biology, mathematics, english and many more. Class 6th to 12th and for college projects also.';
-const imageUrl = '/category-card/logo.png';
+const imageUrl = 'https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj';
 const keywords =
   'Biswombhara Patra, all investigatory projects, investigatory projects, physics investigatory project, chemistry investigatory project, biology investigatory project, mathematics investigatory project, computer science investigatory project, english investigatory project, class 12 physics project file pdf download, class 12 investigatory project, class 12 investigatory project chemistry';
 
