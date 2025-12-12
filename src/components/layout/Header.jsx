@@ -97,7 +97,7 @@ export function Header() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <NavLink href="/">
           <div className="flex items-center gap-2">
-            <Image src="https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj" alt="All Investigatory Projects Logo" width={40} height={40} className="rounded-full" />
+            <Image src="/favicon.ico" alt="All Investigatory Projects Logo" width={40} height={40} className="rounded-full" />
             <span className="font-headline text-xl font-bold">All Investigatory Projects</span>
           </div>
         </NavLink>
@@ -181,7 +181,7 @@ export function Header() {
               <SheetHeader>
                  <NavLink href="/" onClick={() => setMenuOpen(false)}>
                   <SheetTitle className="flex items-center gap-2 border-b pb-6">
-                    <Image src="https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj" alt="All Investigatory Projects Logo" width={40} height={40} className="rounded-full" />
+                    <Image src="/favicon.ico" alt="All Investigatory Projects Logo" width={40} height={40} className="rounded-full" />
                     <span className="font-headline text-2xl font-bold">All Investigatory Projects</span>
                   </SheetTitle>
                  </NavLink>
