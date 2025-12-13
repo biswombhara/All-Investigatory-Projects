@@ -1,6 +1,4 @@
-# Allow all crawlers to access the site
 User-agent: *
 Allow: /
 
-# Point crawlers to the sitemap
 Sitemap: https://allinvestigatoryprojects.netlify.app/sitemap.xml
