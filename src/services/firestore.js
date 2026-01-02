@@ -86,6 +86,19 @@ export const getPdfs = async () => {
   }
 };
 
+export const getEbooks = async () => {
+  try {
+    // This assumes you have a collection named 'ebooks'
+    const q = query(collection(db, 'ebooks'), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const ebooks = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return ebooks;
+  } catch (error) {
+    console.error("Error fetching e-books:", error);
+    return [];
+  }
+};
+
 export const getPdfById = async (id) => {
   try {
     const docRef = doc(db, 'pdfs', id);
