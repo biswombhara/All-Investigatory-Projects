@@ -7,6 +7,7 @@ import { Card, CardContent } from './ui/card.jsx';
 import Image from 'next/image';
 import { Button } from './ui/button.jsx';
 import { Eye } from 'lucide-react';
+import { Badge } from './ui/badge.jsx';
 
 export function EbookCard({ ebook }) {
   const linkHref = `/ebooks/${ebook.id}`;
@@ -30,10 +31,14 @@ export function EbookCard({ ebook }) {
           )}
         </div>
         <CardContent className="p-4 flex flex-col flex-grow">
-          <h3 className="font-headline text-lg font-bold leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors flex-grow">
+          <h3 className="font-headline text-lg font-bold leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors">
             {ebook.title}
           </h3>
-          <div className="mt-4 flex items-center justify-between">
+           <div className="mt-2 flex flex-wrap items-center gap-2">
+            {ebook.subject && <Badge variant="secondary">{ebook.subject}</Badge>}
+            {ebook.class && <Badge variant="outline">{ebook.class}</Badge>}
+          </div>
+          <div className="mt-4 flex items-center justify-between pt-4 border-t">
             <Button variant="outline" size="sm">
               <Eye className="mr-2 h-4 w-4" />
               View
