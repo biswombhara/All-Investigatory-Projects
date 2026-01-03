@@ -50,6 +50,7 @@ const demoEbooks = [
     views: 123,
     subject: 'Physics',
     class: '12th',
+    viewUrl: '#',
   },
   {
     id: 'demo-2',
@@ -58,6 +59,7 @@ const demoEbooks = [
     views: 456,
     subject: 'Chemistry',
     class: 'College ( Any UG & PG )',
+    viewUrl: '#',
   },
   {
     id: 'demo-3',
@@ -66,6 +68,16 @@ const demoEbooks = [
     views: 789,
     subject: 'Mathematics',
     class: '11th',
+    viewUrl: '#',
+  },
+  {
+    id: 'demo-4',
+    title: 'Physics Note',
+    coverImage: 'https://placehold.co/400x600/E5E7EB/4B5563/png?text=Physics+Note',
+    views: 250,
+    subject: 'Physics',
+    class: '12th',
+    viewUrl: 'https://example.com/physics-note',
   },
 ];
 
