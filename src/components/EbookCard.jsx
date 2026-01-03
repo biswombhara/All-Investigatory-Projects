@@ -15,7 +15,7 @@ export function EbookCard({ ebook }) {
   return (
     <Link href={linkHref} className="block group">
       <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden h-full flex flex-col">
-        <div className="relative w-full aspect-[2/3] bg-secondary/50">
+        <div className="relative w-full aspect-[4/5] bg-secondary/50">
           {ebook.coverImage ? (
             <Image
               src={ebook.coverImage}
