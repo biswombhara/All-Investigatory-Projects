@@ -1,5 +1,6 @@
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { saveUser } from './auth.js';
@@ -502,6 +503,54 @@ export const deleteEbook = async (ebookId) => {
     await deleteDoc(ebookRef);
   } catch (error) {
     console.error('Error deleting e-book from Firestore:', error);
+    throw error;
+  }
+};
+
+export const seedEbooksData = async () => {
+  const ebooksCollection = collection(db, 'ebooks');
+  const snapshot = await getDocs(query(ebooksCollection, limit(1)));
+  
+  if (!snapshot.empty) {
+    console.log('Ebooks collection already has data. Seeding skipped.');
+    return;
+  }
+
+  const demoEbooks = [
+    {
+      title: 'Class 12 Physics Revision Notes',
+      class: '12th',
+      subject: 'Physics',
+      coverImage: 'https://www.credinotes.com/cdn/shop/files/NOTES.png',
+      viewUrl: 'https://cdn.shopify.com/s/files/1/0572/7299/1924/files/Oswaal_CBSE_Class_12_Physics_Revision_Notes_For_2023_Exam.pdf?v=1663590013',
+    },
+    {
+      title: 'Chemistry Guide for Class 11',
+      class: '11th',
+      subject: 'Chemistry',
+      coverImage: 'https://placehold.co/400x600/F9A825/FFFFFF?text=Chemistry',
+      viewUrl: 'https://example.com/chemistry-guide',
+    },
+    {
+      title: 'Advanced Mathematics',
+      class: 'College ( Any UG & PG )',
+      subject: 'Mathematics',
+      coverImage: 'https://placehold.co/400x600/4CAF50/FFFFFF?text=Math',
+      viewUrl: 'https://example.com/advanced-math',
+    },
+  ];
+
+  const batch = writeBatch(db);
+  demoEbooks.forEach((ebook) => {
+    const docRef = doc(collection(db, 'ebooks'));
+    batch.set(docRef, { ...ebook, createdAt: serverTimestamp(), views: 0 });
+  });
+
+  try {
+    await batch.commit();
+    console.log('Successfully seeded demo e-books.');
+  } catch (error) {
+    console.error('Error seeding e-books:', error);
     throw error;
   }
 };
