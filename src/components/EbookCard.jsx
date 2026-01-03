@@ -1,20 +1,28 @@
 
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react';
 import { Card, CardContent } from './ui/card.jsx';
 import Image from 'next/image';
 import { Button } from './ui/button.jsx';
 import { Eye } from 'lucide-react';
 import { Badge } from './ui/badge.jsx';
+import { SubscriptionPopup } from './SubscriptionPopup.jsx';
 
 export function EbookCard({ ebook }) {
-  const linkHref = ebook.viewUrl || `/ebooks/${ebook.id}`;
-  const isExternal = ebook.viewUrl;
+  const [isPopupVisible, setPopupVisible] = useState(false);
 
-  const CardBody = () => (
-     <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden h-full flex flex-col">
+  const linkHref = ebook.viewUrl || `/ebooks/${ebook.id}`;
+  
+  const handleViewClick = (e) => {
+    e.preventDefault(); // Prevent default link navigation
+    e.stopPropagation(); // Stop event from bubbling to parent link
+    setPopupVisible(true);
+  };
+
+  return (
+    <>
+      <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden h-full flex flex-col group">
         <div className="relative w-full aspect-[2/3] bg-secondary/50">
           {ebook.coverImage ? (
             <Image
@@ -31,19 +39,17 @@ export function EbookCard({ ebook }) {
           )}
         </div>
         <CardContent className="p-4 flex flex-col flex-grow">
-          <h3 className="font-headline text-lg font-bold leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+          <h3 className="font-headline text-lg font-bold leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors flex-grow">
             {ebook.title}
           </h3>
-           <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {ebook.subject && <Badge variant="secondary">{ebook.subject}</Badge>}
             {ebook.class && <Badge variant="outline">{ebook.class}</Badge>}
           </div>
-          <div className="mt-4 flex items-center justify-between pt-4 border-t flex-grow">
-            <Button variant="outline" size="sm" asChild>
-                <div className="flex items-center">
-                    <Eye className="mr-2 h-4 w-4" />
-                    View
-                </div>
+          <div className="mt-4 flex items-center justify-between pt-4 border-t">
+            <Button variant="outline" size="sm" onClick={handleViewClick}>
+              <Eye className="mr-2 h-4 w-4" />
+              View
             </Button>
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Eye className="h-4 w-4" />
@@ -52,19 +58,13 @@ export function EbookCard({ ebook }) {
           </div>
         </CardContent>
       </Card>
-  );
-
-  if (isExternal) {
-    return (
-      <a href={linkHref} target="_blank" rel="noopener noreferrer" className="block group">
-        <CardBody />
-      </a>
-    );
-  }
-
-  return (
-    <Link href={linkHref} className="block group">
-        <CardBody />
-    </Link>
+      
+      {isPopupVisible && (
+        <SubscriptionPopup
+          redirectUrl={linkHref}
+          onClose={() => setPopupVisible(false)}
+        />
+      )}
+    </>
   );
 }
