@@ -17,6 +17,7 @@ function generateSiteMap(pdfs, posts) {
     '/reviews',
     '/terms-of-service',
     '/upload-pdf',
+    '/e-books',
   ];
   
   return `<?xml version="1.0" encoding="UTF-8"?>

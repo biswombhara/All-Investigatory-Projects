@@ -1,27 +1,21 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from './ui/card.jsx';
 import Image from 'next/image';
 import { Button } from './ui/button.jsx';
 import { Eye } from 'lucide-react';
 import { Badge } from './ui/badge.jsx';
-import { SubscriptionPopup } from './SubscriptionPopup.jsx';
+import Link from 'next/link';
 
 export function EbookCard({ ebook }) {
-  const [isPopupVisible, setPopupVisible] = useState(false);
-
-  const linkHref = ebook.viewUrl || `/ebooks/${ebook.id}`;
-  
-  const handleViewClick = (e) => {
-    e.preventDefault(); // Prevent default link navigation
-    e.stopPropagation(); // Stop event from bubbling to parent link
-    setPopupVisible(true);
-  };
+  // A simple link to the viewUrl for now.
+  // In the future, this could be a page like /ebooks/[id]
+  const linkHref = ebook.viewUrl || '#';
 
   return (
-    <>
+    <Link href={linkHref} target="_blank" rel="noopener noreferrer">
       <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden h-full flex flex-col group">
         <div className="relative w-full aspect-[2/3] bg-secondary/50">
           {ebook.coverImage ? (
@@ -47,7 +41,7 @@ export function EbookCard({ ebook }) {
             {ebook.class && <Badge variant="outline">{ebook.class}</Badge>}
           </div>
           <div className="mt-4 flex items-center justify-between pt-4 border-t">
-            <Button variant="outline" size="sm" onClick={handleViewClick}>
+            <Button variant="outline" size="sm">
               <Eye className="mr-2 h-4 w-4" />
               View
             </Button>
@@ -58,13 +52,6 @@ export function EbookCard({ ebook }) {
           </div>
         </CardContent>
       </Card>
-      
-      {isPopupVisible && (
-        <SubscriptionPopup
-          redirectUrl={linkHref}
-          onClose={() => setPopupVisible(false)}
-        />
-      )}
-    </>
+    </Link>
   );
 }

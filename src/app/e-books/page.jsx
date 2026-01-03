@@ -42,54 +42,6 @@ const allClassesList = [
 
 const sortOptions = ['Latest uploaded', 'Popularity', 'A-Z'];
 
-const demoEbooks = [
-  {
-    id: 'demo-1',
-    title: 'Demo E-Book: The Principles of Physics',
-    coverImage: 'https://placehold.co/400x600/E5E7EB/4B5563/png?text=Physics+E-Book',
-    views: 123,
-    subject: 'Physics',
-    class: '12th',
-    viewUrl: '#',
-  },
-  {
-    id: 'demo-2',
-    title: 'Demo E-Book: Advanced Chemistry',
-    coverImage: 'https://placehold.co/400x600/E5E7EB/4B5563/png?text=Chemistry+E-Book',
-    views: 456,
-    subject: 'Chemistry',
-    class: 'College ( Any UG & PG )',
-    viewUrl: '#',
-  },
-  {
-    id: 'demo-3',
-    title: 'Demo E-Book: A Guide to Modern Mathematics',
-    coverImage: 'https://placehold.co/400x600/E5E7EB/4B5563/png?text=Math+E-Book',
-    views: 789,
-    subject: 'Mathematics',
-    class: '11th',
-    viewUrl: '#',
-  },
-  {
-    id: 'demo-4',
-    title: 'Physics Note',
-    coverImage: 'https://placehold.co/400x600/E5E7EB/4B5563/png?text=Physics+Note',
-    views: 250,
-    subject: 'Physics',
-    class: '12th',
-    viewUrl: 'https://example.com/physics-note',
-  },
-  {
-    id: 'demo-5',
-    title: 'Class 12 Physics Revision Notes',
-    coverImage: 'https://www.credinotes.com/cdn/shop/files/NOTES.png',
-    views: 0,
-    subject: 'Physics',
-    class: '12th',
-    viewUrl: 'https://cdn.shopify.com/s/files/1/0572/7299/1924/files/Oswaal_CBSE_Class_12_Physics_Revision_Notes_For_2023_Exam.pdf?v=1663590013',
-  },
-];
-
 
 export default function EBooksPage() {
   const [ebooks, setEbooks] = useState([]);
@@ -106,15 +58,10 @@ export default function EBooksPage() {
     const fetchEbooks = async () => {
       setLoading(true);
       try {
-        let fetchedEbooks = await getEbooks();
-        if (fetchedEbooks.length === 0) {
-          // If no ebooks are in Firestore, use the demo data
-          fetchedEbooks = demoEbooks;
-        }
+        const fetchedEbooks = await getEbooks();
         setEbooks(fetchedEbooks);
       } catch (error) {
         console.error("Failed to fetch e-books:", error);
-        setEbooks(demoEbooks); // Fallback to demo data on error
       } finally {
         setLoading(false);
       }

@@ -1,4 +1,3 @@
-
 import { EbookCard } from './EbookCard.jsx';
 
 export function EbookList({ ebooks }) {
