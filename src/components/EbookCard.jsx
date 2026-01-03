@@ -10,12 +10,12 @@ import { Eye } from 'lucide-react';
 import { Badge } from './ui/badge.jsx';
 
 export function EbookCard({ ebook }) {
-  const linkHref = `/ebooks/${ebook.id}`;
+  const linkHref = ebook.viewUrl || `/ebooks/${ebook.id}`;
+  const isExternal = ebook.viewUrl;
 
-  return (
-    <Link href={linkHref} className="block group">
-      <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden h-full flex flex-col">
-        <div className="relative w-full aspect-[4/5] bg-secondary/50">
+  const CardBody = () => (
+     <Card className="transition-all duration-300 hover:shadow-xl hover:border-primary/50 overflow-hidden h-full flex flex-col">
+        <div className="relative w-full aspect-[2/3] bg-secondary/50">
           {ebook.coverImage ? (
             <Image
               src={ebook.coverImage}
@@ -38,10 +38,12 @@ export function EbookCard({ ebook }) {
             {ebook.subject && <Badge variant="secondary">{ebook.subject}</Badge>}
             {ebook.class && <Badge variant="outline">{ebook.class}</Badge>}
           </div>
-          <div className="mt-4 flex items-center justify-between pt-4 border-t">
-            <Button variant="outline" size="sm">
-              <Eye className="mr-2 h-4 w-4" />
-              View
+          <div className="mt-4 flex items-center justify-between pt-4 border-t flex-grow">
+            <Button variant="outline" size="sm" asChild>
+                <div className="flex items-center">
+                    <Eye className="mr-2 h-4 w-4" />
+                    View
+                </div>
             </Button>
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Eye className="h-4 w-4" />
@@ -50,6 +52,19 @@ export function EbookCard({ ebook }) {
           </div>
         </CardContent>
       </Card>
+  );
+
+  if (isExternal) {
+    return (
+      <a href={linkHref} target="_blank" rel="noopener noreferrer" className="block group">
+        <CardBody />
+      </a>
+    );
+  }
+
+  return (
+    <Link href={linkHref} className="block group">
+        <CardBody />
     </Link>
   );
 }

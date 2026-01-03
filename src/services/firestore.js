@@ -481,4 +481,28 @@ export const getRelatedBlogPosts = async (currentPostId, authorId) => {
     return [];
   }
 };
+
+// E-book Functions
+export const saveEbook = async (ebookData) => {
+  try {
+    await addDoc(collection(db, 'ebooks'), {
+      ...ebookData,
+      createdAt: serverTimestamp(),
+      views: 0,
+    });
+  } catch (error) {
+    console.error('Error saving e-book:', error);
+    throw error;
+  }
+};
+
+export const deleteEbook = async (ebookId) => {
+  try {
+    const ebookRef = doc(db, 'ebooks', ebookId);
+    await deleteDoc(ebookRef);
+  } catch (error) {
+    console.error('Error deleting e-book from Firestore:', error);
+    throw error;
+  }
+};
     

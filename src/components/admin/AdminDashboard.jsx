@@ -10,12 +10,14 @@ import { CopyrightRequestsTab } from './CopyrightRequestsTab.jsx';
 import { ConnectSubmissionsTab } from './ConnectSubmissionsTab.jsx';
 import { BlogsTab } from './BlogsTab.jsx';
 import { UsersTab } from './UsersTab.jsx';
+import { EbooksTab } from './EbooksTab.jsx';
 
 export function AdminDashboard() {
   return (
     <Tabs defaultValue="requests" className="w-full">
-      <TabsList className="grid w-full grid-cols-1 h-auto md:h-10 md:grid-cols-7">
+      <TabsList className="grid w-full grid-cols-1 h-auto md:h-10 md:grid-cols-8">
         <TabsTrigger value="requests">PDF Requests</TabsTrigger>
+        <TabsTrigger value="ebooks">E-books</TabsTrigger>
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
         <TabsTrigger value="blogs">Blogs</TabsTrigger>
@@ -25,6 +27,9 @@ export function AdminDashboard() {
       </TabsList>
       <TabsContent value="requests">
         <PdfRequestsTab />
+      </TabsContent>
+       <TabsContent value="ebooks">
+        <EbooksTab />
       </TabsContent>
       <TabsContent value="reviews">
         <ReviewsTab />
