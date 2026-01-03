@@ -79,6 +79,15 @@ const demoEbooks = [
     class: '12th',
     viewUrl: 'https://example.com/physics-note',
   },
+  {
+    id: 'demo-5',
+    title: 'Class 12 Physics Revision Notes',
+    coverImage: 'https://www.credinotes.com/cdn/shop/files/NOTES.png',
+    views: 0,
+    subject: 'Physics',
+    class: '12th',
+    viewUrl: 'https://cdn.shopify.com/s/files/1/0572/7299/1924/files/Oswaal_CBSE_Class_12_Physics_Revision_Notes_For_2023_Exam.pdf?v=1663590013',
+  },
 ];
 
 
