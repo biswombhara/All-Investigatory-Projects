@@ -20,7 +20,7 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https' ,
         hostname: 'yt3.googleusercontent.com',
         port: '',
         pathname: '/**',
@@ -34,6 +34,12 @@ const nextConfig = {
        {
         protocol: 'https',
         hostname: 'drive.google.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.credinotes.com',
         port: '',
         pathname: '/**',
       },
