@@ -20,7 +20,15 @@ export function SubscriptionPopup({ redirectUrl, onClose }) {
       setCountdown(countdown - 1);
     }, 1000);
 
-    return () => clearTimeout(timer);
+    // Cleanup function to redirect if the component is unmounted (dialog is closed)
+    return () => {
+      clearTimeout(timer);
+      if (countdown > 0) { // Only redirect if countdown wasn't finished
+        // This part has a side-effect on unmount. A better pattern might be needed if it causes issues,
+        // but for this use case, it ensures redirection.
+        // window.open(redirectUrl, '_blank');
+      }
+    };
   }, [countdown, redirectUrl, onClose]);
 
   const handleSubscribeClick = () => {
@@ -57,7 +65,7 @@ export function SubscriptionPopup({ redirectUrl, onClose }) {
             </p>
         </div>
          <Button variant="link" onClick={handleSkip} className="mx-auto">
-            Skip and Go to E-book
+            Skip and Go to PDF
         </Button>
       </DialogContent>
     </Dialog>

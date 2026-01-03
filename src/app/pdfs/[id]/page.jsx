@@ -11,6 +11,7 @@ import { Download, AlertCircle, Book, Tag, User, Eye } from 'lucide-react';
 import { RelatedPdfs } from '../../../components/RelatedPdfs.jsx';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useParams } from 'next/navigation.js';
+import { SubscriptionPopup } from '../../../components/SubscriptionPopup.jsx';
 
 
 export default function PdfViewerPage() {
@@ -18,6 +19,7 @@ export default function PdfViewerPage() {
   const [relatedPdfs, setRelatedPdfs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPopupVisible, setPopupVisible] = useState(false);
   const { hideLoader } = useContext(LoadingContext);
   const params = useParams();
 
@@ -54,6 +56,10 @@ export default function PdfViewerPage() {
     fetchPdf();
   }, [params, hideLoader]);
 
+  const handleDownloadClick = () => {
+    setPopupVisible(true);
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -75,55 +81,61 @@ export default function PdfViewerPage() {
 
 
   return (
-    <div className="bg-secondary/30">
-        <div className="container mx-auto px-4 py-8">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-                <div className="mb-6 rounded-lg bg-background p-6 shadow-md">
-                <h1 className="font-headline text-3xl font-bold">{pdf.title}</h1>
-                <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                    <User className="h-4 w-4" />
-                    <span>{pdf.authorName || 'Anonymous'}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                    <Book className="h-4 w-4" />
-                    <Badge variant="secondary">{pdf.subject}</Badge>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                    <Tag className="h-4 w-4" />
-                    <Badge variant="outline">{pdf.class}</Badge>
-                    </div>
-                     <div className="flex items-center gap-1.5">
-                      <Eye className="h-4 w-4" />
-                      <span>{pdf.views || 0} views</span>
-                    </div>
-                </div>
-                <Button asChild>
-                    <a href={pdf.url} target="_blank" rel="noopener noreferrer">
-                    <Download className="mr-2 h-4 w-4" />
-                    Download PDF
-                    </a>
-                </Button>
-                </div>
+    <>
+      <div className="bg-secondary/30">
+          <div className="container mx-auto px-4 py-8">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                  <div className="mb-6 rounded-lg bg-background p-6 shadow-md">
+                  <h1 className="font-headline text-3xl font-bold">{pdf.title}</h1>
+                  <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                      <User className="h-4 w-4" />
+                      <span>{pdf.authorName || 'Anonymous'}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                      <Book className="h-4 w-4" />
+                      <Badge variant="secondary">{pdf.subject}</Badge>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                      <Tag className="h-4 w-4" />
+                      <Badge variant="outline">{pdf.class}</Badge>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Eye className="h-4 w-4" />
+                        <span>{pdf.views || 0} views</span>
+                      </div>
+                  </div>
+                  <Button onClick={handleDownloadClick}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download PDF
+                  </Button>
+                  </div>
 
-                <div className="relative aspect-[8.5/11] w-full rounded-lg bg-background shadow-lg overflow-hidden">
-                    <iframe
-                        src={embedUrl}
-                        className="h-full w-full border-0"
-                        allow="fullscreen"
-                        title={pdf.title}
-                    ></iframe>
-                    {/* This div is the overlay to hide the pop-out button */}
-                    <div className="absolute top-0 right-0 h-14 w-14 bg-transparent"></div>
-                </div>
-            </div>
+                  <div className="relative aspect-[8.5/11] w-full rounded-lg bg-background shadow-lg overflow-hidden">
+                      <iframe
+                          src={embedUrl}
+                          className="h-full w-full border-0"
+                          allow="fullscreen"
+                          title={pdf.title}
+                      ></iframe>
+                      {/* This div is the overlay to hide the pop-out button */}
+                      <div className="absolute top-0 right-0 h-14 w-14 bg-transparent"></div>
+                  </div>
+              </div>
 
-            <div className="lg:col-span-1">
-                <RelatedPdfs pdfs={relatedPdfs} />
-            </div>
-            </div>
-        </div>
-    </div>
+              <div className="lg:col-span-1">
+                  <RelatedPdfs pdfs={relatedPdfs} />
+              </div>
+              </div>
+          </div>
+      </div>
+      {isPopupVisible && (
+        <SubscriptionPopup
+          redirectUrl={pdf.url}
+          onClose={() => setPopupVisible(false)}
+        />
+      )}
+    </>
   );
 }
