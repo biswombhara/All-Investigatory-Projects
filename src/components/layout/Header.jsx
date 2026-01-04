@@ -51,7 +51,6 @@ const navLinks = [
   { href: '/pdfs', label: 'Projects' },
   { href: '/blogs', label: 'Blog' },
   { href: '/reviews', label: 'Reviews' },
-  { href: '/e-books', label: 'E-Book' },
 ];
 
 export function Header() {
