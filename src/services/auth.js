@@ -58,10 +58,6 @@ export const signOutUser = () => {
   return signOut(auth);
 };
 
-export const onAuthStateChanged = (callback) => {
-  return auth.onAuthStateChanged(callback);
-};
-
 export const updateUserProfile = async (user, profileData) => {
   if (!user) throw new Error("User not authenticated");
 

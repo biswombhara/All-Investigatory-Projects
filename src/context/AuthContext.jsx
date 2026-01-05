@@ -2,8 +2,8 @@
 'use client';
 
 import React, { createContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithGoogle, saveUser } from '../services/auth.js';
-import { GoogleAuthProvider, getRedirectResult } from 'firebase/auth';
+import { onAuthStateChanged, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from 'firebase/auth';
+import { signInWithGoogle, saveUser } from '../services/auth.js';
 import { auth } from '../lib/firebase.js';
 
 export const AuthContext = createContext();
@@ -17,32 +17,43 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
+        // On a fresh login, we might not have the access token yet.
+        // It's better to handle getting it after the redirect result.
       } else {
-        // This case is important for when the app first loads before redirect result is processed.
-        // We check for the redirect result here.
-        try {
-          const result = await getRedirectResult(auth);
-          if (result) {
-            // User just signed in via redirect.
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            if (credential) {
-              setAccessToken(credential.accessToken);
-            }
-            await saveUser(result.user);
-            setUser(result.user);
-          }
-        } catch (error) {
-          console.error("Error processing redirect result:", error);
-        }
+        setUser(null);
       }
       setLoading(false);
     });
+
+    // Check for redirect result on initial load
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result) {
+          // This is the signed-in user
+          const user = result.user;
+          setUser(user);
+          
+          // Get the access token.
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          if (credential) {
+            setAccessToken(credential.accessToken);
+          }
+
+          // Save user to Firestore
+          await saveUser(user);
+        }
+      })
+      .catch((error) => {
+        console.error("Error processing redirect result:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
 
     return () => unsubscribe();
   }, []);
   
   const signIn = async () => {
-    // This now just initiates the redirect.
     setLoading(true);
     await signInWithGoogle();
   };
@@ -52,15 +63,13 @@ export const AuthProvider = ({ children }) => {
     setUser(auth.currentUser);
   }
 
-
   const value = {
     user,
     loading,
     signIn,
     reloadUser,
-    accessToken, // Expose the access token
+    accessToken,
   };
-
 
   return (
     <AuthContext.Provider value={value}>
