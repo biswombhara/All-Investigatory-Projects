@@ -1,6 +1,6 @@
 
 
-import { GoogleAuthProvider, signInWithPopup, signOut, updateProfile, getRedirectResult, reauthenticateWithPopup, signInWithRedirect } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from 'firebase/auth';
 import { auth, db } from '../lib/firebase.js';
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 
@@ -41,18 +41,35 @@ export const updateUserInFirestore = async (userId, data) => {
   }
 };
 
-
 export const signInWithGoogle = async () => {
   try {
-    // We use signInWithRedirect which is more reliable and avoids popup blockers.
-    await signInWithRedirect(auth, provider);
-    // The rest of the logic (getting user, token, and saving) will be handled 
-    // by the onAuthStateChanged listener and getRedirectResult in the AuthProvider.
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    
+    // Save user to Firestore after successful sign-in
+    await saveUser(user);
+
+    // Get the access token.
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    if (credential) {
+      // The access token can be used to access the Google API.
+      const accessToken = credential.accessToken;
+      return { user, accessToken };
+    }
+
+    return { user, accessToken: null };
+    
   } catch (error) {
-    console.error("Error starting sign in with Google redirect: ", error);
+    // Handle specific errors, like popup closed by user
+    if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+      console.log("Sign-in popup closed by user.");
+      return null;
+    }
+    console.error("Error during sign in with Google popup: ", error);
     throw error;
   }
 };
+
 
 export const signOutUser = () => {
   return signOut(auth);
@@ -80,5 +97,3 @@ export const updateUserProfile = async (user, profileData) => {
     throw error;
   }
 };
-
-    

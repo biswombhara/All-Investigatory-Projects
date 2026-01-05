@@ -2,9 +2,10 @@
 'use client';
 
 import React, { createContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from 'firebase/auth';
-import { signInWithGoogle, saveUser } from '../services/auth.js';
+import { onAuthStateChanged } from 'firebase/auth';
+import { signInWithGoogle } from '../services/auth.js';
 import { auth } from '../lib/firebase.js';
+import { GoogleAuthProvider } from 'firebase/auth';
 
 export const AuthContext = createContext();
 
@@ -15,47 +16,26 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        // On a fresh login, we might not have the access token yet.
-        // It's better to handle getting it after the redirect result.
-      } else {
-        setUser(null);
-      }
+      setUser(user);
       setLoading(false);
     });
-
-    // Check for redirect result on initial load
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result) {
-          // This is the signed-in user
-          const user = result.user;
-          setUser(user);
-          
-          // Get the access token.
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          if (credential) {
-            setAccessToken(credential.accessToken);
-          }
-
-          // Save user to Firestore
-          await saveUser(user);
-        }
-      })
-      .catch((error) => {
-        console.error("Error processing redirect result:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
 
     return () => unsubscribe();
   }, []);
   
   const signIn = async () => {
     setLoading(true);
-    await signInWithGoogle();
+    try {
+      const result = await signInWithGoogle();
+      if (result) {
+        setUser(result.user);
+        setAccessToken(result.accessToken);
+      }
+    } catch (error) {
+        console.error("Sign in failed", error);
+    } finally {
+        setLoading(false);
+    }
   };
   
   const reloadUser = async () => {
