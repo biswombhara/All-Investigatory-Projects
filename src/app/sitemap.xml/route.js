@@ -10,6 +10,7 @@ function generateSiteMap(pdfs, posts) {
     '/connect',
     '/copyright-removal',
     '/disclaimer',
+    '/e-books',
     '/pdfs',
     '/privacy-policy',
     '/profile',

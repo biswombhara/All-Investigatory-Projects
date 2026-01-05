@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,9 +18,9 @@ import {
 import { Input } from '../ui/input.jsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card.jsx';
 import { useToast } from '../../hooks/use-toast.js';
-import { UploadCloud, Type, Image as ImageIcon, Link as LinkIcon, School, FileText, Trash2, AlertTriangle, Loader2, Database } from 'lucide-react';
+import { UploadCloud, Type, Image as ImageIcon, Link as LinkIcon, School, FileText, Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
-import { saveEbook, getEbooks, deleteEbook, seedEbooksData } from '../../services/firestore.js';
+import { saveEbook, getEbooks, deleteEbook } from '../../services/firestore.js';
 import {
   Select,
   SelectContent,
@@ -134,20 +133,6 @@ export function EbooksTab() {
     }
   }
 
-  const handleSeedData = async () => {
-    showLoader();
-    try {
-      await seedEbooksData();
-      toast({ title: 'Database Seeded', description: 'Demo e-books have been added.' });
-      fetchEbooks(); // Refresh the list
-    } catch (error) {
-      console.error("Failed to seed data", error);
-      toast({ title: 'Error', description: 'Failed to seed demo data.', variant: 'destructive' });
-    } finally {
-      hideLoader();
-    }
-  };
-
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -252,15 +237,9 @@ export function EbooksTab() {
       <Card>
         <CardHeader>
           <CardTitle>Manage E-books</CardTitle>
-          <CardDescription>Review and delete existing e-books. You can also add demo data for testing.</CardDescription>
+          <CardDescription>Review and delete existing e-books.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
-              <Button onClick={handleSeedData} variant="outline">
-                <Database className="mr-2 h-4 w-4" />
-                Seed Demo E-books (One-time)
-              </Button>
-          </div>
           {loading ? (
             <Skeleton className="h-64 w-full" />
           ) : ebooks.length > 0 ? (
