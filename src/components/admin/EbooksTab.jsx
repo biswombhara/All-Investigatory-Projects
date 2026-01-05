@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui
 import { useToast } from '../../hooks/use-toast.js';
 import { UploadCloud, Type, Image as ImageIcon, Link as LinkIcon, School, FileText, Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
+import { AuthContext } from '../../context/AuthContext.jsx';
 import { saveEbook, getEbooks, deleteEbook } from '../../services/firestore.js';
 import {
   Select,
@@ -71,6 +72,7 @@ const classes = [
 export function EbooksTab() {
   const { toast } = useToast();
   const { showLoader, hideLoader } = useContext(LoadingContext);
+  const { user } = useContext(AuthContext);
   const [ebooks, setEbooks] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -99,9 +101,17 @@ export function EbooksTab() {
   const { isSubmitting } = form.formState;
 
   async function onSubmit(values) {
+    if (!user) {
+        toast({
+            title: 'Authentication Error',
+            description: 'You must be logged in to upload an e-book.',
+            variant: 'destructive',
+        });
+        return;
+    }
     showLoader();
     try {
-      await saveEbook(values);
+      await saveEbook(values, user);
       toast({
         title: 'E-book Uploaded!',
         description: `${values.title} is now available.`,
@@ -111,7 +121,7 @@ export function EbooksTab() {
     } catch (err) {
       toast({
         title: 'Upload Failed',
-        description: 'Something went wrong. Please try again.',
+        description: err.message || 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
     } finally {

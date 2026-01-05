@@ -2,6 +2,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { saveUser } from './auth.js';
@@ -205,10 +206,14 @@ export const listenToVisitorCount = (callback) => {
 
 
 // E-Book Functions
-export const saveEbook = async (ebookData) => {
+export const saveEbook = async (ebookData, user) => {
+  if (!user) throw new Error('User must be authenticated to upload an e-book.');
   try {
     await addDoc(collection(db, 'ebooks'), {
       ...ebookData,
+      authorId: user.uid,
+      authorName: user.displayName,
+      authorPhotoURL: user.photoURL,
       createdAt: serverTimestamp(),
       views: 0,
     });
