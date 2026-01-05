@@ -14,40 +14,36 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged((user) => {
-      setUser(user);
-       if (!user) {
-        setAccessToken(null);
-      }
-      // Keep loading until we have checked for a redirect result.
-    });
-
-    // Check for redirect result on initial load.
-    getRedirectResult(auth)
-      .then(async (result) => {
-        if (result) {
-          // This is the success case after a redirect.
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          if (credential) {
-            setAccessToken(credential.accessToken);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        // This case is important for when the app first loads before redirect result is processed.
+        // We check for the redirect result here.
+        try {
+          const result = await getRedirectResult(auth);
+          if (result) {
+            // User just signed in via redirect.
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            if (credential) {
+              setAccessToken(credential.accessToken);
+            }
+            await saveUser(result.user);
+            setUser(result.user);
           }
-          await saveUser(result.user);
-          setUser(result.user); // Explicitly set user from redirect result
+        } catch (error) {
+          console.error("Error processing redirect result:", error);
         }
-      })
-      .catch((error) => {
-        console.error("Error getting redirect result: ", error);
-      })
-      .finally(() => {
-        // Only stop loading after we've processed the redirect.
-        setLoading(false);
-      });
+      }
+      setLoading(false);
+    });
 
     return () => unsubscribe();
   }, []);
   
   const signIn = async () => {
     // This now just initiates the redirect.
+    setLoading(true);
     await signInWithGoogle();
   };
   
