@@ -1,4 +1,3 @@
-
 'use client';
 
 import { HeroSection } from '../components/HeroSection.jsx';
@@ -8,9 +7,12 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card.jsx';
 import { CategoryCard } from '../components/CategoryCard.jsx';
 import { FaqSection } from '../components/FaqSection.jsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { getPdfs } from '../services/firestore.js';
 import { PdfList } from '../components/PdfList.jsx';
+import { AuthContext } from '../context/AuthContext.jsx';
+
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
 
 const categories = [
@@ -71,6 +73,8 @@ function FeaturedDocuments() {
 
 
 export default function Home() {
+  const { user } = useContext(AuthContext);
+  const isAdmin = user && user.email === ADMIN_EMAIL;
 
   return (
     <div className="flex flex-col">
@@ -113,7 +117,7 @@ export default function Home() {
               Help our community grow by requesting or uploading new educational materials.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className={`grid grid-cols-1 gap-8 mx-auto ${isAdmin ? 'md:grid-cols-2 max-w-4xl' : 'max-w-lg'}`}>
             <Card className="text-center shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
@@ -130,22 +134,24 @@ export default function Home() {
                 </Button>
               </CardContent>
             </Card>
-            <Card className="text-center shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
-                  <UploadCloud className="h-8 w-8 text-primary" />
-                </div>
-                <CardTitle className="font-headline mt-4">Upload a PDF</CardTitle>
-                <CardDescription>
-                  Have an investigatory project or notes to share? Upload them and help other students.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild size="lg">
-                  <Link href="/upload-pdf">Share Your Document</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            {isAdmin && (
+              <Card className="text-center shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="mx-auto bg-primary/10 rounded-full p-3 w-fit">
+                    <UploadCloud className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="font-headline mt-4">Upload a PDF</CardTitle>
+                  <CardDescription>
+                    Have an investigatory project or notes to share? Upload them and help other students.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild size="lg">
+                    <Link href="/upload-pdf">Share Your Document</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </section>
