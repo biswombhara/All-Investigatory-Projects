@@ -1,3 +1,4 @@
+
 'use client';
 
 import { HeroSection } from '../components/HeroSection.jsx';
@@ -8,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { CategoryCard } from '../components/CategoryCard.jsx';
 import { FaqSection } from '../components/FaqSection.jsx';
 import { useEffect, useState, useContext } from 'react';
-import { getPdfs } from '../services/firestore.js';
+import { getPdfs, getBlogPosts } from '../services/firestore.js';
 import { PdfList } from '../components/PdfList.jsx';
 import { AuthContext } from '../context/AuthContext.jsx';
+import { BlogPostCard } from '../components/BlogPostCard.jsx';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -72,6 +74,58 @@ function FeaturedDocuments() {
 }
 
 
+function FeaturedBlogPosts() {
+  const [latestPosts, setLatestPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLatestPosts = async () => {
+      setLoading(true);
+      try {
+        const allPosts = await getBlogPosts();
+        setLatestPosts(allPosts.slice(0, 3)); // Get latest 3 posts
+      } catch (error) {
+        console.error("Failed to fetch latest posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLatestPosts();
+  }, []);
+
+  if (loading || latestPosts.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="py-16 sm:py-20 lg:py-24 bg-secondary">
+      <div className="container mx-auto px-4">
+        <div className="mb-10 text-center md:mb-16">
+          <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            Latest From Our Blog
+          </h2>
+          <p className="mt-3 text-lg text-muted-foreground max-w-2xl mx-auto">
+            Catch up on our newest articles and insights.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+          {latestPosts.map((post) => (
+            <BlogPostCard key={post.id} post={post} />
+          ))}
+        </div>
+         <div className="mt-12 text-center md:mt-16">
+            <Button asChild size="lg" className="rounded-full shadow-lg hover:shadow-xl transition-shadow">
+              <Link href="/blogs">
+                Read All Posts <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+      </div>
+    </section>
+  );
+}
+
+
 export default function Home() {
   const { user } = useContext(AuthContext);
   const isAdmin = user && user.email === ADMIN_EMAIL;
@@ -80,7 +134,8 @@ export default function Home() {
     <div className="flex flex-col">
       <HeroSection />
       <FeaturedDocuments />
-       <section className="py-16 sm:py-20 lg:py-24 bg-secondary">
+      <FeaturedBlogPosts />
+       <section className="py-16 sm:py-20 lg:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="mb-10 text-center md:mb-16">
             <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -107,7 +162,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 lg:py-24 bg-background">
+      <section className="py-16 sm:py-20 lg:py-24 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="mb-10 text-center md:mb-16">
             <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">

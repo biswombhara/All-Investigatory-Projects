@@ -5,7 +5,7 @@ import { useEffect, useState, useContext } from 'react';
 import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts } from '../services/firestore.js';
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
-import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye } from 'lucide-react';
+import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye, Twitter, Facebook, Linkedin } from 'lucide-react';
 import Image from 'next/image';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { AuthContext } from '../context/AuthContext.jsx';
@@ -37,6 +37,56 @@ const getInitials = (name) => {
     const names = name.split(' ');
     return names.map((n) => n[0]).join('');
 };
+
+const SocialShareButtons = ({ post }) => {
+  if (!post) return null;
+
+  const siteUrl = 'https://allinvestigatoryprojects.netlify.app';
+  const postUrl = `${siteUrl}/blogs/${post.slug}`;
+  const encodedUrl = encodeURIComponent(postUrl);
+  const encodedTitle = encodeURIComponent(post.title);
+
+  const shareLinks = [
+    {
+      name: 'Twitter',
+      url: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+      Icon: Twitter,
+      className: 'bg-[#1DA1F2] hover:bg-[#1DA1F2]/90',
+    },
+    {
+      name: 'Facebook',
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      Icon: Facebook,
+      className: 'bg-[#1877F2] hover:bg-[#1877F2]/90',
+    },
+    {
+      name: 'LinkedIn',
+      url: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`,
+      Icon: Linkedin,
+      className: 'bg-[#0A66C2] hover:bg-[#0A66C2]/90',
+    },
+  ];
+
+  return (
+    <div className="flex items-center gap-2">
+       <span className="text-sm font-medium">Share:</span>
+        {shareLinks.map(({ name, url, Icon, className }) => (
+          <a
+            key={name}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Share on ${name}`}
+          >
+            <Button className={`${className} text-white h-8 w-8`} size="icon">
+              <Icon className="h-4 w-4" />
+            </Button>
+          </a>
+        ))}
+    </div>
+  );
+};
+
 
 const RelatedPosts = ({ currentPostId, authorId }) => {
   const [relatedPosts, setRelatedPosts] = useState([]);
@@ -349,7 +399,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
               <MDEditor.Markdown source={post.description} style={{ background: 'transparent' }} />
             </div>
 
-            <div className="mt-8 border-t pt-6">
+            <div className="mt-8 border-t pt-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-6">
                 <Button variant="ghost" onClick={handleLike} disabled={!user} className="flex items-center gap-2">
                   <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
@@ -360,6 +410,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
                   <span>{comments.length} Comments</span>
                 </div>
               </div>
+              <SocialShareButtons post={post} />
             </div>
             
             <div className="mt-8 border-t pt-8">
