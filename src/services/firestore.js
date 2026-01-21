@@ -3,6 +3,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { saveUser } from './auth.js';
@@ -204,44 +205,6 @@ export const listenToVisitorCount = (callback) => {
   });
 };
 
-
-// E-Book Functions
-export const saveEbook = async (ebookData, user) => {
-  if (!user) throw new Error('User must be authenticated to upload an e-book.');
-  try {
-    await addDoc(collection(db, 'ebooks'), {
-      ...ebookData,
-      authorId: user.uid,
-      authorName: user.displayName,
-      authorPhotoURL: user.photoURL,
-      createdAt: serverTimestamp(),
-      views: 0,
-    });
-  } catch (error) {
-    console.error('Error saving e-book:', error);
-    throw error;
-  }
-};
-
-export const getEbooks = async () => {
-  try {
-    const q = query(collection(db, 'ebooks'), orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Error fetching e-books:", error);
-    return [];
-  }
-};
-
-export const deleteEbook = async (ebookId) => {
-  try {
-    await deleteDoc(doc(db, 'ebooks', ebookId));
-  } catch (error) {
-    console.error('Error deleting e-book from Firestore:', error);
-    throw error;
-  }
-};
 
 // Admin-specific functions
 

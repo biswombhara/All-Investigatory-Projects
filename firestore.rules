@@ -42,15 +42,6 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
     
-    // E-books are public to read.
-    // Signed-in users (i.e., the admin via the dashboard) can create.
-    // Only admins can update or delete them.
-    match /ebooks/{ebookId} {
-      allow read: if true;
-      allow create: if isSignedIn();
-      allow update, delete: if isAdmin();
-    }
-
     // Reviews are public to read.
     // Logged-in users can create reviews. Admins can delete them.
     match /reviews/{reviewId} {

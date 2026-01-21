@@ -49,7 +49,6 @@ const NavLink = ({ href, children, onClick }) => {
 
 const navLinks = [
   { href: '/pdfs', label: 'Projects' },
-  { href: '/e-books', label: 'E-Books' },
   { href: '/blogs', label: 'Blog' },
   { href: '/reviews', label: 'Reviews' },
 ];
