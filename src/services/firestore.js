@@ -4,6 +4,7 @@
 
 
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { saveUser } from './auth.js';
@@ -63,10 +64,38 @@ export const savePdfDocument = async (pdfData, user) => {
   const isAdmin = user.email === ADMIN_EMAIL;
   const authorName = isAdmin ? 'Admin' : user.displayName;
 
+  const generateSlug = (title) => {
+    if (!title) return '';
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // remove special characters
+      .replace(/\s+/g, '-') // replace spaces with hyphens
+      .replace(/-+/g, '-') // remove multiple hyphens
+      .trim();
+  };
+
+  const baseSlug = generateSlug(pdfData.title);
+  let finalSlug = baseSlug;
+  let counter = 2;
+  
+  // Keep checking for a unique slug
+  while (true) {
+    const docRef = doc(db, 'pdfs', finalSlug);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      break; // We found a unique slug, so we can exit the loop
+    }
+    // If the slug exists, append a number and try again
+    finalSlug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+  
+  const docRef = doc(db, 'pdfs', finalSlug);
 
   try {
-    await addDoc(collection(db, 'pdfs'), {
+    await setDoc(docRef, {
       ...pdfData,
+      slug: finalSlug, // Save the final slug in the document itself for consistency
       authorId: user.uid,
       authorName: authorName,
       createdAt: serverTimestamp(),
