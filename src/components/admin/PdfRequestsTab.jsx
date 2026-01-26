@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
@@ -57,6 +56,7 @@ export function PdfRequestsTab() {
         <CardTitle>PDF Requests</CardTitle>
         <CardDescription>
           Manage and review all user-submitted PDF requests.
+          {!loading && ` (${requests.length} total)`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

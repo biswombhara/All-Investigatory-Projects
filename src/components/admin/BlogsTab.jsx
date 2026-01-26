@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
@@ -79,6 +78,7 @@ export function BlogsTab() {
         <CardTitle>Manage Blog Posts</CardTitle>
         <CardDescription>
           Review, manage comments for, and delete blog posts.
+          {!loading && ` (${posts.length} total)`}
         </CardDescription>
       </CardHeader>
       <CardContent>

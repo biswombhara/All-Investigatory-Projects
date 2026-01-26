@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
@@ -73,6 +72,7 @@ export function ReviewsTab() {
         <CardTitle>User Reviews</CardTitle>
         <CardDescription>
           Here are the latest reviews submitted by your users.
+          {!loading && ` (${reviews.length} total)`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

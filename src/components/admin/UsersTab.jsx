@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -49,6 +48,7 @@ export function UsersTab() {
         <CardTitle>Registered Users</CardTitle>
         <CardDescription>
           A list of all users who have registered on the site, sorted by the most recent.
+          {!loading && ` (${users.length} total)`}
         </CardDescription>
       </CardHeader>
       <CardContent>

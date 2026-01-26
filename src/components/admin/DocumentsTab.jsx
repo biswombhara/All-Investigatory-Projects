@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
@@ -74,6 +73,7 @@ export function DocumentsTab() {
         <CardTitle>Manage Documents</CardTitle>
         <CardDescription>
           Review and delete uploaded documents.
+          {!loading && ` (${documents.length} total)`}
         </CardDescription>
       </CardHeader>
       <CardContent>

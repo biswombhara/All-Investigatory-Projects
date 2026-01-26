@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
@@ -56,6 +55,7 @@ export function ConnectSubmissionsTab() {
         <CardTitle>Connect Submissions</CardTitle>
         <CardDescription>
           Review messages from the "Connect" page.
+          {!loading && ` (${submissions.length} total)`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
@@ -58,6 +57,7 @@ export function CopyrightRequestsTab() {
         <CardTitle>Copyright Removal Requests</CardTitle>
         <CardDescription>
           Review and manage copyright infringement claims.
+          {!loading && ` (${requests.length} total)`}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
