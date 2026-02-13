@@ -22,6 +22,15 @@ function isAdmin() {
   return isSignedIn() && request.auth.token.email == adminEmail();
 }
 
+// Check if the only field being updated is 'views' and it's being incremented by 1
+function isIncrementingViews() {
+  let isUpdatingViewsOnly = request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']);
+  let isIncrementing = request.resource.data.views == resource.data.views + 1;
+  // Handle the case where the 'views' field doesn't exist yet and is being initialized to 1
+  let isFirstView = !('views' in resource.data) && request.resource.data.views == 1;
+  return isUpdatingViewsOnly && (isIncrementing || isFirstView);
+}
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -56,7 +65,7 @@ service cloud.firestore {
     match /blogPosts/{postId} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])) || (isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin()));
+      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])) || isIncrementingViews() || (isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin()));
       allow delete: if isAdmin();
 
       // Comments subcollection
