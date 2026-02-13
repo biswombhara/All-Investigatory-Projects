@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
-import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts } from '../services/firestore.js';
+import { getBlogPostBySlug, likeBlogPost, unlikeBlogPost, addCommentToPost, getCommentsForPost, deleteComment, getRelatedBlogPosts, incrementBlogPostView } from '../services/firestore.js';
 import { Loader } from './Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert.jsx';
 import { AlertCircle, User, Calendar, Heart, MessageCircle, Send, Trash2, Edit, Eye, Twitter, Facebook, Linkedin } from 'lucide-react';
@@ -28,7 +28,6 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog.jsx';
 import { Card, CardContent } from './ui/card.jsx';
-import { incrementBlogPostView } from '../actions/update-views.js';
 
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -223,7 +222,6 @@ export default function BlogPostPageClient({ slug, initialPost }) {
       try {
         setLoading(true);
         
-        // Safely increment view count via server action
         if (initialPost?.id) {
           await incrementBlogPostView(initialPost.id);
         }

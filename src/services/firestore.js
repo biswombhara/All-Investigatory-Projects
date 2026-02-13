@@ -1,4 +1,5 @@
 
+
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { saveUser } from './auth.js';
@@ -143,6 +144,24 @@ export const incrementPdfViewCount = async (pdfId) => {
         await setDoc(pdfRef, { views: 1 }, { merge: true });
     } else {
         console.error("Could not increment view count:", error.message);
+    }
+  }
+};
+
+export const incrementBlogPostView = async (postId) => {
+  if (!postId) return;
+
+  const postRef = doc(db, 'blogPosts', postId);
+  try {
+    await updateDoc(postRef, {
+      views: increment(1)
+    });
+  } catch (error) {
+    if (error.code === 'not-found') {
+        // If the document or the 'views' field doesn't exist, create it.
+        await setDoc(postRef, { views: 1 }, { merge: true });
+    } else {
+        console.error("Could not increment blog post view count:", error.message);
     }
   }
 };
@@ -497,16 +516,17 @@ export const getRelatedBlogPosts = async (currentPostId, authorId) => {
     const q = query(
       collection(db, 'blogPosts'),
       where('authorId', '==', authorId),
-      where('__name__', '!=', currentPostId), // Exclude the current post
-      orderBy('__name__'), // Cannot have inequality on a field used for ordering
-      limit(2)
+      orderBy('createdAt', 'desc'),
+      limit(3) // Fetch 3, so we can filter one out if it's the current post
     );
     const querySnapshot = await getDocs(q);
-    // As we can't order by date, we'll manually sort them afterwards.
-    // This is a Firestore limitation when using inequality filters.
-    const posts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return posts.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
 
+    const posts = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(post => post.id !== currentPostId) // Exclude the current post
+      .slice(0, 2); // And take the first 2 of the remaining
+
+    return posts;
   } catch (error) {
     console.error("Error fetching related blog posts:", error);
     return [];

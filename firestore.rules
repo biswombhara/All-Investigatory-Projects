@@ -48,7 +48,8 @@ service cloud.firestore {
     match /pdfs/{pdfId} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update, delete: if isAdmin();
+      allow update: if isIncrementingViews() || isAdmin();
+      allow delete: if isAdmin();
     }
     
     // Reviews are public to read.
@@ -60,12 +61,14 @@ service cloud.firestore {
     }
     
     // Blog posts are public to read.
-    // Logged-in users can like posts and add comments.
-    // The author or an admin can edit or delete a post.
+    // Logged-in users can create posts.
     match /blogPosts/{postId} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])) || isIncrementingViews() || (isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin()));
+      // Allow full updates by owner/admin
+      allow update: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
+      // Allow partial updates for likes and views by anyone
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']) || isIncrementingViews();
       allow delete: if isAdmin();
 
       // Comments subcollection
