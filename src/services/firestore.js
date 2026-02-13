@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { saveUser } from './auth.js';
@@ -403,23 +397,28 @@ export const deleteBlogPost = async (postId) => {
   }
 };
 
-export const likeBlogPost = async (postId, userId) => {
+export const likeBlogPost = async (postId, likerId) => {
   const postRef = doc(db, 'blogPosts', postId);
   try {
     await updateDoc(postRef, {
-      likes: arrayUnion(userId),
+      likes: arrayUnion(likerId),
     });
   } catch (error) {
-    console.error('Error liking post:', error);
-    throw error;
+     // This can happen if the 'likes' field doesn't exist yet on an old document
+     if (error.code === 'invalid-argument' || error.message.includes('arrayUnion')) {
+        await setDoc(postRef, { likes: [likerId] }, { merge: true });
+     } else {
+        console.error('Error liking post:', error);
+        throw error;
+     }
   }
 };
 
-export const unlikeBlogPost = async (postId, userId) => {
+export const unlikeBlogPost = async (postId, likerId) => {
   const postRef = doc(db, 'blogPosts', postId);
   try {
     await updateDoc(postRef, {
-      likes: arrayRemove(userId),
+      likes: arrayRemove(likerId),
     });
   } catch (error) {
     console.error('Error unliking post:', error);
@@ -427,15 +426,27 @@ export const unlikeBlogPost = async (postId, userId) => {
   }
 };
 
-export const addCommentToPost = async (postId, commentData, user) => {
-  if (!user) throw new Error('User must be authenticated to comment.');
+export const addCommentToPost = async (postId, commentData, author) => {
   const commentsCollectionRef = collection(db, 'blogPosts', postId, 'comments');
+
+  const authorDetails = author.uid
+    ? {
+        authorId: author.uid,
+        authorName: author.displayName,
+        authorPhotoURL: author.photoURL,
+      }
+    : {
+        authorName: author.authorName,
+      };
+
+  if (!authorDetails.authorName) {
+    throw new Error('Author name is required to comment.');
+  }
+
   try {
     await addDoc(commentsCollectionRef, {
       ...commentData,
-      authorId: user.uid,
-      authorName: user.displayName,
-      authorPhotoURL: user.photoURL,
+      ...authorDetails,
       createdAt: serverTimestamp(),
     });
   } catch (error) {
@@ -501,4 +512,3 @@ export const getRelatedBlogPosts = async (currentPostId, authorId) => {
     return [];
   }
 };
-    

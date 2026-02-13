@@ -11,6 +11,7 @@ import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { AuthContext } from '../context/AuthContext.jsx';
 import { Button } from './ui/button.jsx';
 import { Textarea } from './ui/textarea.jsx';
+import { Input } from './ui/input.jsx';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar.jsx';
 import Link from 'next/link';
 import MDEditor from '@uiw/react-md-editor';
@@ -182,16 +183,33 @@ const Comment = ({ comment, isAdmin, onDelete }) => {
   );
 };
 
+function useAnonymousId() {
+  const [anonId, setAnonId] = useState(null);
+  useEffect(() => {
+    let anonymousId = localStorage.getItem('anonymousId');
+    if (!anonymousId) {
+        anonymousId = 'anon_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('anonymousId', anonymousId);
+    }
+    setAnonId(anonymousId);
+  }, []);
+  return anonId;
+}
+
 export default function BlogPostPageClient({ slug, initialPost }) {
   const [post, setPost] = useState(initialPost);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [anonymousName, setAnonymousName] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [loading, setLoading] = useState(!initialPost);
   const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
+  const { toast } = useToast();
 
-  const hasLiked = post?.likes?.includes(user?.uid);
+  const anonId = useAnonymousId();
+  const likerId = user ? user.uid : anonId;
+  const hasLiked = post?.likes?.includes(likerId);
   const isAuthor = post?.authorId === user?.uid;
   const isAdmin = user && user.email === ADMIN_EMAIL;
   
@@ -246,36 +264,65 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   }, [slug, initialPost?.id]);
 
   const handleLike = async () => {
-    if (!user || !post) return;
+    if (!likerId || !post) return;
     try {
       if (hasLiked) {
-        await unlikeBlogPost(post.id, user.uid);
-        setPost(prev => ({ ...prev, likes: prev.likes.filter(id => id !== user.uid) }));
+        await unlikeBlogPost(post.id, likerId);
+        setPost(prev => ({ ...prev, likes: prev.likes.filter(id => id !== likerId) }));
       } else {
-        await likeBlogPost(post.id, user.uid);
-        setPost(prev => ({ ...prev, likes: [...(prev.likes || []), user.uid] }));
+        await likeBlogPost(post.id, likerId);
+        setPost(prev => ({ ...prev, likes: [...(prev.likes || []), likerId] }));
       }
     } catch (error) {
       console.error("Failed to update like status", error);
+       toast({
+        title: "Error",
+        description: "Could not update like status. Please try again.",
+        variant: "destructive",
+      });
     }
   };
   
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (!user || !newComment.trim() || !post) return;
+    if (!newComment.trim() || !post) return;
+
+    let author;
+    if (user) {
+        author = user;
+    } else {
+        if (!anonymousName.trim()) {
+            toast({ title: "Name required", description: "Please enter your name to post a comment.", variant: "destructive" });
+            return;
+        }
+        author = { authorName: anonymousName };
+    }
     
     setIsSubmittingComment(true);
     try {
-        await addCommentToPost(post.id, { text: newComment }, user);
+        await addCommentToPost(post.id, { text: newComment }, author);
         setNewComment('');
+        if (!user) {
+            localStorage.setItem('anonymousName', anonymousName);
+        }
         const fetchedComments = await getCommentsForPost(post.id);
         setComments(fetchedComments);
     } catch (error) {
         console.error("Failed to add comment", error);
+        toast({ title: "Error", description: "Could not post comment. Please try again.", variant: "destructive" });
     } finally {
         setIsSubmittingComment(false);
     }
   };
+
+  useEffect(() => {
+    if (!user) {
+      const savedName = localStorage.getItem('anonymousName');
+      if (savedName) {
+        setAnonymousName(savedName);
+      }
+    }
+  }, [user]);
 
   const handleCommentDelete = async (commentId) => {
     if (!post) return;
@@ -344,6 +391,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   }
 
   const postDate = post.createdAt ? format(typeof post.createdAt === 'string' ? parseISO(post.createdAt) : new Date(post.createdAt.seconds * 1000), 'PPP') : 'Just now';
+  const likeCount = Array.isArray(post.likes) ? post.likes.length : post.likes || 0;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12 sm:py-16">
@@ -401,9 +449,9 @@ export default function BlogPostPageClient({ slug, initialPost }) {
 
             <div className="mt-8 border-t pt-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-6">
-                <Button variant="ghost" onClick={handleLike} disabled={!user} className="flex items-center gap-2">
+                <Button variant="ghost" onClick={handleLike} className="flex items-center gap-2">
                   <Heart className={`h-5 w-5 ${hasLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                  <span>{post.likes?.length || 0} Likes</span>
+                  <span>{likeCount} Likes</span>
                 </Button>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MessageCircle className="h-5 w-5" />
@@ -415,22 +463,31 @@ export default function BlogPostPageClient({ slug, initialPost }) {
             
             <div className="mt-8 border-t pt-8">
               <h2 className="font-headline text-2xl font-bold">Comments</h2>
-              {user ? (
-                  <form onSubmit={handleCommentSubmit} className="mt-4 flex flex-col gap-4">
-                      <Textarea 
-                          value={newComment}
-                          onChange={(e) => setNewComment(e.target.value)}
-                          placeholder="Add your comment..."
-                          rows={3}
-                      />
-                      <Button type="submit" disabled={isSubmittingComment} className="self-start">
-                          {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
-                          <Send className="ml-2 h-4 w-4" />
-                      </Button>
-                  </form>
-              ) : (
-                  <p className="mt-4 text-muted-foreground">You must be logged in to comment.</p>
-              )}
+              <form onSubmit={handleCommentSubmit} className="mt-4 flex flex-col gap-4">
+                  {!user && (
+                      <div className="flex flex-col gap-2">
+                         <label htmlFor="anonymousName" className="text-sm font-medium">Name</label>
+                          <Input 
+                              id="anonymousName"
+                              value={anonymousName}
+                              onChange={(e) => setAnonymousName(e.target.value)}
+                              placeholder="Enter your name"
+                              required
+                          />
+                      </div>
+                  )}
+                  <Textarea 
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add your comment..."
+                      rows={3}
+                      required
+                  />
+                  <Button type="submit" disabled={isSubmittingComment} className="self-start">
+                      {isSubmittingComment ? 'Submitting...' : 'Submit Comment'}
+                      <Send className="ml-2 h-4 w-4" />
+                  </Button>
+              </form>
 
               <div className="mt-8 space-y-6">
                   {comments.length > 0 ? (
