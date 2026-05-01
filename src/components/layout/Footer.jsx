@@ -21,9 +21,6 @@ export function Footer() {
             <p className="mt-2 text-sm text-muted-foreground">
               Your ultimate resource for educational materials, curated from our YouTube channel.
             </p>
-             <p className="mt-4 text-sm text-muted-foreground">
-                Proudly created with Biswombhara Patra
-              </p>
           </div>
           <div>
             <h3 className="font-headline text-lg font-semibold text-foreground">Follow Us</h3>
