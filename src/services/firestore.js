@@ -1,5 +1,5 @@
 
-import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
+import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -509,4 +509,110 @@ export const getRelatedBlogPosts = async (currentPostId, authorId) => {
     console.error("Error fetching related blog posts:", error);
     return [];
   }
+};
+
+export const seedHighTrafficBlogs = async () => {
+  const blogs = [
+    {
+      title: "AI in Education: Transforming the Classroom in 2026",
+      description: "Artificial Intelligence is no longer a futuristic concept; it's the engine driving a revolution in education. By 2026, personalized learning paths and AI tutors will be standard in classrooms worldwide.",
+      coverImage: "https://picsum.photos/seed/ai-edu/1200/630",
+      slug: "ai-in-education-2026",
+      keywords: "AI, education, future, learning, 2026",
+      date: new Date('2025-09-15')
+    },
+    {
+      title: "The Future of Healthcare: Telemedicine and Personal AI Assistants",
+      description: "Healthcare is becoming more accessible and efficient thanks to AI. Discover how personal health assistants will monitor our vitals in real-time by 2026.",
+      coverImage: "https://picsum.photos/seed/healthcare/1200/630",
+      slug: "future-of-healthcare-2026",
+      keywords: "healthcare, AI, telemedicine, medicine",
+      date: new Date('2025-10-20')
+    },
+    {
+      title: "Top 5 Careers for 2026: Why Data Science is Still King",
+      description: "As industries digitize, the demand for data literacy is sky-high. We analyze the top job markets to watch as we head into 2026.",
+      coverImage: "https://picsum.photos/seed/careers/1200/630",
+      slug: "top-careers-2026",
+      keywords: "careers, data science, jobs, 2026, technology",
+      date: new Date('2025-11-05')
+    },
+    {
+      title: "Mental Health in the Digital Age: Strategies for Students",
+      description: "Balancing screen time and study time is crucial. We explore practical strategies for students to maintain mental well-being in an always-connected world.",
+      coverImage: "https://picsum.photos/seed/mentalhealth/1200/630",
+      slug: "mental-health-students",
+      keywords: "mental health, students, digital age, well-being",
+      date: new Date('2025-12-12')
+    },
+    {
+      title: "Sustainable Energy: The Breakthroughs Powering Our Future",
+      description: "From solid-state batteries to fusion energy experiments, the path to a green 2026 is clearer than ever.",
+      coverImage: "https://picsum.photos/seed/energy/1200/630",
+      slug: "sustainable-energy-breakthroughs",
+      keywords: "sustainability, energy, green tech, climate",
+      date: new Date('2026-01-18')
+    },
+    {
+      title: "Quantum Computing for Beginners: What You Need to Know",
+      description: "Quantum computing is complex but transformative. Here's a plain-english guide to the technology that will redefine processing power by 2026.",
+      coverImage: "https://picsum.photos/seed/quantum/1200/630",
+      slug: "quantum-computing-guide",
+      keywords: "quantum computing, technology, guide, processing",
+      date: new Date('2026-02-25')
+    },
+    {
+      title: "The Gig Economy in 2026: How to Thrive as a Freelancer",
+      description: "Freelancing is the new normal for millions. Learn the tools and mindsets needed to succeed in the decentralized workforce of 2026.",
+      coverImage: "https://picsum.photos/seed/gig/1200/630",
+      slug: "gig-economy-2026",
+      keywords: "freelancing, gig economy, work, 2026",
+      date: new Date('2026-03-10')
+    },
+    {
+      title: "Biotechnology: Revolutionizing Medicine and Agriculture",
+      description: "CRISPR and mRNA tech are just the beginning. 2026 will see breakthroughs in drought-resistant crops and personalized cancer treatments.",
+      coverImage: "https://picsum.photos/seed/bio/1200/630",
+      slug: "biotech-revolution-2026",
+      keywords: "biotechnology, medicine, agriculture, science",
+      date: new Date('2026-04-05')
+    },
+    {
+      title: "Space Exploration: The Next Decade of Lunar Missions",
+      description: "Humanity is heading back to the Moon. We look at the upcoming Artemis missions and the goal of a sustainable lunar base by 2030.",
+      coverImage: "https://picsum.photos/seed/space/1200/630",
+      slug: "space-exploration-lunar",
+      keywords: "space, NASA, moon, exploration, future",
+      date: new Date('2025-09-30')
+    },
+    {
+      title: "Cybersecurity Essentials: Protecting Your Data in 2026",
+      description: "As AI-driven attacks rise, personal data protection is paramount. Here are the top 5 tools you need to stay safe online in 2026.",
+      coverImage: "https://picsum.photos/seed/cyber/1200/630",
+      slug: "cybersecurity-2026-essentials",
+      keywords: "cybersecurity, data protection, security, AI",
+      date: new Date('2025-10-10')
+    }
+  ];
+
+  const batch = writeBatch(db);
+  blogs.forEach((blog) => {
+    const postRef = doc(collection(db, 'blogPosts'));
+    batch.set(postRef, {
+      title: blog.title,
+      description: blog.description,
+      coverImage: blog.coverImage,
+      slug: blog.slug,
+      keywords: blog.keywords,
+      authorId: "seed-admin-id",
+      authorName: "Admin",
+      authorEmail: "allinvestigatoryprojects@gmail.com",
+      authorPhotoURL: "https://yt3.googleusercontent.com/4bUuIDk_BIXQEWPFuYoXGKd94hhTXLW6jrJDynplZD8vNIlPuvo6TiibXVJcsAAKdKQZsOMRtw=s160-c-k-c0x00ffffff-no-rj",
+      createdAt: Timestamp.fromDate(blog.date),
+      likes: [],
+      views: Math.floor(Math.random() * 500) + 100
+    });
+  });
+
+  await batch.commit();
 };

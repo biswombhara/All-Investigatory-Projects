@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useContext } from 'react';
@@ -9,7 +10,7 @@ import {
   CardTitle,
 } from '../ui/card.jsx';
 import { Skeleton } from '../ui/skeleton.jsx';
-import { getBlogPosts, deleteBlogPost } from '../../services/firestore.js';
+import { getBlogPosts, deleteBlogPost, seedHighTrafficBlogs } from '../../services/firestore.js';
 import {
   Table,
   TableBody,
@@ -19,7 +20,7 @@ import {
   TableRow,
 } from '../ui/table.jsx';
 import { Button } from '../ui/button.jsx';
-import { Trash2, AlertTriangle, MessageSquare } from 'lucide-react';
+import { Trash2, AlertTriangle, MessageSquare, Database, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +45,7 @@ import { CommentsList } from './CommentsList.jsx';
 export function BlogsTab() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
   const { toast } = useToast();
   const { showLoader, hideLoader } = useContext(LoadingContext);
 
@@ -72,14 +74,40 @@ export function BlogsTab() {
     }
   }
 
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      await seedHighTrafficBlogs();
+      toast({
+        title: 'Content Seeded!',
+        description: '10 valuable blog posts have been added to your database.',
+      });
+      fetchPosts();
+    } catch (error) {
+      toast({
+        title: 'Seeding Failed',
+        description: 'Something went wrong while seeding content.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Manage Blog Posts</CardTitle>
-        <CardDescription>
-          Review, manage comments for, and delete blog posts.
-          {!loading && ` (${posts.length} total)`}
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <div>
+          <CardTitle>Manage Blog Posts</CardTitle>
+          <CardDescription>
+            Review, manage comments for, and delete blog posts.
+            {!loading && ` (${posts.length} total)`}
+          </CardDescription>
+        </div>
+        <Button onClick={handleSeed} disabled={seeding} variant="outline" size="sm">
+          {seeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+          Seed High-Traffic Content
+        </Button>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -134,9 +162,13 @@ export function BlogsTab() {
             ))}
           </div>
         ) : (
-          <p className="py-8 text-center text-muted-foreground">
-            No blog posts found.
-          </p>
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground mb-4">No blog posts found.</p>
+             <Button onClick={handleSeed} disabled={seeding}>
+                {seeding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Database className="mr-2 h-4 w-4" />}
+                Seed Initial High-Traffic Content
+             </Button>
+          </div>
         )}
       </CardContent>
     </Card>
