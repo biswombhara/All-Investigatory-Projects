@@ -1,8 +1,6 @@
 
-
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
-import { saveUser } from './auth.js';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -63,9 +61,9 @@ export const savePdfDocument = async (pdfData, user) => {
     if (!title) return '';
     return title
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '') // remove special characters
-      .replace(/\s+/g, '-') // replace spaces with hyphens
-      .replace(/-+/g, '-') // remove multiple hyphens
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
       .trim();
   };
 
@@ -73,14 +71,12 @@ export const savePdfDocument = async (pdfData, user) => {
   let finalSlug = baseSlug;
   let counter = 2;
   
-  // Keep checking for a unique slug
   while (true) {
     const docRef = doc(db, 'pdfs', finalSlug);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
-      break; // We found a unique slug, so we can exit the loop
+      break;
     }
-    // If the slug exists, append a number and try again
     finalSlug = `${baseSlug}-${counter}`;
     counter++;
   }
@@ -90,7 +86,7 @@ export const savePdfDocument = async (pdfData, user) => {
   try {
     await setDoc(docRef, {
       ...pdfData,
-      slug: finalSlug, // Save the final slug in the document itself for consistency
+      slug: finalSlug,
       authorId: user.uid,
       authorName: authorName,
       createdAt: serverTimestamp(),
@@ -140,7 +136,6 @@ export const incrementPdfViewCount = async (pdfId) => {
     });
   } catch (error) {
     if (error.code === 'not-found') {
-        // If the document or the 'views' field doesn't exist, create it.
         await setDoc(pdfRef, { views: 1 }, { merge: true });
     } else {
         console.error("Could not increment view count:", error.message);
@@ -158,7 +153,6 @@ export const incrementBlogPostView = async (postId) => {
     });
   } catch (error) {
     if (error.code === 'not-found') {
-        // If the document or the 'views' field doesn't exist, create it.
         await setDoc(postRef, { views: 1 }, { merge: true });
     } else {
         console.error("Could not increment blog post view count:", error.message);
@@ -221,9 +215,8 @@ export const incrementVisitorCount = async () => {
       count: increment(1),
     });
   } catch (error) {
-    // If the document doesn't exist, create it.
     if (error.code === 'not-found') {
-      await setDoc(statsRef, { count: 1 }); // Start at 1 for the current user
+      await setDoc(statsRef, { count: 1 });
     } else {
       console.error('Could not increment visitor count:', error);
     }
@@ -232,23 +225,17 @@ export const incrementVisitorCount = async () => {
 
 export const listenToVisitorCount = (callback) => {
   const statsRef = doc(db, 'siteStats', 'visitorCounter');
-  // Return the unsubscribe function to be called on cleanup
   return onSnapshot(statsRef, (doc) => {
     if (doc.exists()) {
       callback(doc.data().count);
     } else {
-      // If the document doesn't exist, you might want to initialize it
-      // or handle the state appropriately (e.g., show 0 or a loading state).
-       setDoc(statsRef, { count: 0 }); // Starting from a base number
+       setDoc(statsRef, { count: 0 });
        callback(0);
     }
   }, (error) => {
       console.error('Error listening to visitor count:', error);
   });
 };
-
-
-// Admin-specific functions
 
 export const getAllPdfRequests = async () => {
   try {
@@ -334,7 +321,6 @@ export const updateContactSubmissionStatus = async (submissionId, status) => {
   }
 };
 
-// Blog Functions
 export const saveBlogPost = async (postData, user) => {
   if (!user) throw new Error('User must be authenticated to create a post.');
 
@@ -398,17 +384,13 @@ export const getBlogPostBySlug = async (slug) => {
 export const deleteBlogPost = async (postId) => {
   try {
     const postRef = doc(db, 'blogPosts', postId);
-    
-    // Also delete all comments in the subcollection
     const commentsRef = collection(db, 'blogPosts', postId, 'comments');
     const commentsSnapshot = await getDocs(commentsRef);
-    
     const batch = writeBatch(db);
     commentsSnapshot.docs.forEach((doc) => {
       batch.delete(doc.ref);
     });
     await batch.commit();
-
     await deleteDoc(postRef);
   } catch (error) {
     console.error('Error deleting blog post and its comments:', error);
@@ -423,7 +405,6 @@ export const likeBlogPost = async (postId, likerId) => {
       likes: arrayUnion(likerId),
     });
   } catch (error) {
-     // This can happen if the 'likes' field doesn't exist yet on an old document
      if (error.code === 'invalid-argument' || error.message.includes('arrayUnion')) {
         await setDoc(postRef, { likes: [likerId] }, { merge: true });
      } else {
@@ -447,7 +428,6 @@ export const unlikeBlogPost = async (postId, likerId) => {
 
 export const addCommentToPost = async (postId, commentData, author) => {
   const commentsCollectionRef = collection(db, 'blogPosts', postId, 'comments');
-
   const authorDetails = author.uid
     ? {
         authorId: author.uid,
@@ -517,15 +497,13 @@ export const getRelatedBlogPosts = async (currentPostId, authorId) => {
       collection(db, 'blogPosts'),
       where('authorId', '==', authorId),
       orderBy('createdAt', 'desc'),
-      limit(3) // Fetch 3, so we can filter one out if it's the current post
+      limit(3)
     );
     const querySnapshot = await getDocs(q);
-
     const posts = querySnapshot.docs
       .map(doc => ({ id: doc.id, ...doc.data() }))
-      .filter(post => post.id !== currentPostId) // Exclude the current post
-      .slice(0, 2); // And take the first 2 of the remaining
-
+      .filter(post => post.id !== currentPostId)
+      .slice(0, 2);
     return posts;
   } catch (error) {
     console.error("Error fetching related blog posts:", error);

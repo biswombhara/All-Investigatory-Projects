@@ -4,10 +4,10 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog.jsx';
 import { Button } from './ui/button.jsx';
-import { Youtube } from 'lucide-react';
+import { Youtube, ExternalLink } from 'lucide-react';
 
 export function SubscriptionPopup({ redirectUrl, onClose }) {
-  const [countdown, setCountdown] = useState(15);
+  const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
     if (countdown <= 0) {
@@ -20,14 +20,8 @@ export function SubscriptionPopup({ redirectUrl, onClose }) {
       setCountdown(countdown - 1);
     }, 1000);
 
-    // Cleanup function to redirect if the component is unmounted (dialog is closed)
     return () => {
       clearTimeout(timer);
-      if (countdown > 0) { // Only redirect if countdown wasn't finished
-        // This part has a side-effect on unmount. A better pattern might be needed if it causes issues,
-        // but for this use case, it ensures redirection.
-        // window.open(redirectUrl, '_blank');
-      }
     };
   }, [countdown, redirectUrl, onClose]);
 
@@ -46,27 +40,31 @@ export function SubscriptionPopup({ redirectUrl, onClose }) {
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-headline text-2xl text-center">Please Support Us!</DialogTitle>
-          <DialogDescription className="text-center text-lg">
-            Like our content? Please subscribe to our YouTube channel to help us grow.
+          <DialogTitle className="font-headline text-2xl text-center">Support Our Work</DialogTitle>
+          <DialogDescription className="text-center text-base mt-2">
+            Subscribe to our YouTube channel to get the latest project updates and tutorials.
           </DialogDescription>
         </DialogHeader>
         <div className="my-6 flex flex-col items-center justify-center gap-4">
             <Button
                 onClick={handleSubscribeClick}
-                className="w-full bg-red-600 hover:bg-red-700 text-white"
-                size="lg"
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-12"
             >
                 <Youtube className="mr-2 h-6 w-6" />
-                Subscribe to YouTube
+                Subscribe & Download
             </Button>
-            <p className="text-sm text-muted-foreground">
-                You will be redirected in {countdown} seconds...
+            
+            <p className="text-sm text-muted-foreground animate-pulse">
+                Auto-redirecting in {countdown}s...
             </p>
+
+            <div className="w-full flex items-center justify-center gap-2 mt-2">
+                <Button variant="outline" onClick={handleSkip} className="w-full">
+                    Skip and View PDF
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
+            </div>
         </div>
-         <Button variant="link" onClick={handleSkip} className="mx-auto">
-            Skip and Go to PDF
-        </Button>
       </DialogContent>
     </Dialog>
   );

@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '../../components/ui/form.jsx';
 import { Input } from '../../components/ui/input.jsx';
+import { Textarea } from '../../components/ui/textarea.jsx';
 import {
   Select,
   SelectContent,
@@ -37,13 +38,14 @@ import {
 } from '../../components/ui/alert-dialog.jsx';
 import { uploadPdfToGoogleDrive } from '../../services/storage.js'; 
 import { savePdfDocument } from '../../services/firestore.js'; 
-import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2, School } from 'lucide-react';
+import { LogIn, UploadCloud, FileText, Type, ShieldCheck, AlertCircle, Loader2, School, AlignLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { LoadingContext } from '../../context/LoadingContext.jsx';
 
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
+  description: z.string().min(50, 'Please provide a description of at least 50 characters for better SEO.'),
   subject: z.string({
     required_error: 'Please select a subject.',
   }),
@@ -85,6 +87,7 @@ export default function UploadPdfPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
+      description: '',
       subject: '',
       class: '',
       file: undefined,
@@ -117,6 +120,7 @@ export default function UploadPdfPage() {
       
       const pdfData = {
         title: values.title,
+        description: values.description,
         subject: values.subject,
         class: values.class,
         url: driveFile.webViewLink,
@@ -180,7 +184,7 @@ export default function UploadPdfPage() {
                   Document Details
                 </CardTitle>
                 <CardDescription>
-                  Provide the file and some information about it.
+                  Provide the file and some unique information about it to help other students find it.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -203,56 +207,80 @@ export default function UploadPdfPage() {
                     />
                     <FormField
                       control={form.control}
-                      name="subject"
+                      name="description"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
-                            <FileText className="h-4 w-4" /> Subject
+                            <AlignLeft className="h-4 w-4" /> Document Description
                           </FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a subject category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {subjects.map((subject) => (
-                                <SelectItem key={subject} value={subject}>
-                                  {subject}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormControl>
+                            <Textarea 
+                                placeholder="Write a brief summary of what this project covers. Detailed descriptions help with search visibility." 
+                                className="min-h-[120px]"
+                                {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Min 50 characters. Describe the topics, objectives, and findings of the project.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="class"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <School className="h-4 w-4" /> Class
-                          </FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a class" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {classes.map((c) => (
-                                <SelectItem key={c} value={c}>
-                                  {c}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                        control={form.control}
+                        name="subject"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                                <FileText className="h-4 w-4" /> Subject
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select subject" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {subjects.map((subject) => (
+                                    <SelectItem key={subject} value={subject}>
+                                    {subject}
+                                    </SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="class"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                                <School className="h-4 w-4" /> Class
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select class" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {classes.map((c) => (
+                                    <SelectItem key={c} value={c}>
+                                    {c}
+                                    </SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
                     <FormField
                       control={form.control}
                       name="file"
@@ -332,5 +360,3 @@ export default function UploadPdfPage() {
     </>
   );
 }
-
-    

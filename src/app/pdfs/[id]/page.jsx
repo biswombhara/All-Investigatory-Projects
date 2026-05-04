@@ -7,7 +7,8 @@ import { Loader } from '../../../components/Loader.jsx';
 import { Alert, AlertDescription, AlertTitle } from '../../../components/ui/alert.jsx';
 import { Badge } from '../../../components/ui/badge.jsx';
 import { Button } from '../../../components/ui/button.jsx';
-import { Download, AlertCircle, Book, Tag, User, Eye } from 'lucide-react';
+import { Separator } from '../../../components/ui/separator.jsx';
+import { Download, AlertCircle, Book, Tag, User, Eye, AlignLeft } from 'lucide-react';
 import { RelatedPdfs } from '../../../components/RelatedPdfs.jsx';
 import { LoadingContext } from '../../../context/LoadingContext.jsx';
 import { useParams } from 'next/navigation.js';
@@ -82,37 +83,51 @@ export default function PdfViewerPage() {
 
   return (
     <>
-      <div className="bg-secondary/30">
+      <div className="bg-secondary/30 min-h-screen">
           <div className="container mx-auto px-4 py-8">
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               <div className="lg:col-span-2">
                   <div className="mb-6 rounded-lg bg-background p-6 shadow-md">
-                  <h1 className="font-headline text-3xl font-bold">{pdf.title}</h1>
-                  <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                      <User className="h-4 w-4" />
-                      <span>{pdf.authorName || 'Anonymous'}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                      <Book className="h-4 w-4" />
-                      <Badge variant="secondary">{pdf.subject}</Badge>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                      <Tag className="h-4 w-4" />
-                      <Badge variant="outline">{pdf.class}</Badge>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Eye className="h-4 w-4" />
-                        <span>{pdf.views || 0} views</span>
-                      </div>
-                  </div>
-                  <Button onClick={handleDownloadClick}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download PDF
-                  </Button>
+                    <h1 className="font-headline text-3xl font-bold">{pdf.title}</h1>
+                    <div className="mb-6 mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                        <User className="h-4 w-4" />
+                        <span>{pdf.authorName || 'Anonymous'}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                        <Book className="h-4 w-4" />
+                        <Badge variant="secondary">{pdf.subject}</Badge>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                        <Tag className="h-4 w-4" />
+                        <Badge variant="outline">{pdf.class}</Badge>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <Eye className="h-4 w-4" />
+                            <span>{pdf.views || 0} views</span>
+                        </div>
+                    </div>
+
+                    {pdf.description && (
+                        <div className="mb-6">
+                            <div className="flex items-center gap-2 text-primary font-semibold mb-2">
+                                <AlignLeft className="h-4 w-4" />
+                                <span>Project Summary</span>
+                            </div>
+                            <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                                {pdf.description}
+                            </p>
+                            <Separator className="my-6" />
+                        </div>
+                    )}
+
+                    <Button onClick={handleDownloadClick} size="lg" className="w-full sm:w-auto">
+                        <Download className="mr-2 h-5 w-5" />
+                        Download PDF
+                    </Button>
                   </div>
 
-                  <div className="relative aspect-[8.5/11] w-full rounded-lg bg-background shadow-lg overflow-hidden">
+                  <div className="relative aspect-[8.5/11] w-full rounded-lg bg-background shadow-lg overflow-hidden border">
                       <iframe
                           src={embedUrl}
                           className="h-full w-full border-0"
