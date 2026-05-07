@@ -2,7 +2,7 @@
 import { doc, setDoc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, updateDoc, arrayUnion, arrayRemove, where, onSnapshot, deleteDoc, increment, writeBatch, limit, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'allinvestigatoryprojects@gmail.com';
 
 export const getAllUsers = async () => {
   try {
@@ -89,6 +89,7 @@ export const savePdfDocument = async (pdfData, user) => {
       slug: finalSlug,
       authorId: user.uid,
       authorName: authorName,
+      authorEmail: user.email,
       createdAt: serverTimestamp(),
       views: 0,
     });
@@ -324,11 +325,15 @@ export const updateContactSubmissionStatus = async (submissionId, status) => {
 export const saveBlogPost = async (postData, user) => {
   if (!user) throw new Error('User must be authenticated to create a post.');
 
+  const isAdmin = user.email === ADMIN_EMAIL;
+  const authorName = isAdmin ? 'Admin' : user.displayName;
+
   try {
     await addDoc(collection(db, 'blogPosts'), {
       ...postData,
       authorId: user.uid,
-      authorName: user.displayName,
+      authorName: authorName,
+      authorEmail: user.email,
       authorPhotoURL: user.photoURL,
       createdAt: serverTimestamp(),
       likes: [],

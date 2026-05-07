@@ -30,12 +30,19 @@ import {
 import { Card, CardContent } from './ui/card.jsx';
 
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'allinvestigatoryprojects@gmail.com';
 
 const getInitials = (name) => {
     if (!name) return '';
     const names = name.split(' ');
     return names.map((n) => n[0]).join('');
+};
+
+const getDisplayAuthorName = (post) => {
+  if (post.authorEmail === ADMIN_EMAIL || post.authorName === 'All Investigatory Projects' || post.authorName === 'All_Investigatory Projects') {
+    return 'Admin';
+  }
+  return post.authorName || 'Anonymous';
 };
 
 const SocialShareButtons = ({ post }) => {
@@ -211,6 +218,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
   const hasLiked = post?.likes?.includes(likerId);
   const isAuthor = post?.authorId === user?.uid;
   const isAdmin = user && user.email === ADMIN_EMAIL;
+  const displayAuthorName = post ? getDisplayAuthorName(post) : '';
   
   useEffect(() => {
     const fetchPostData = async () => {
@@ -340,7 +348,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
 
     const fullKeywords = [
       post.title,
-      post.authorName,
+      displayAuthorName,
       ...(post.keywords ? post.keywords.split(',').map(k => k.trim()) : [])
     ].join(', ');
 
@@ -353,7 +361,7 @@ export default function BlogPostPageClient({ slug, initialPost }) {
       keywords: fullKeywords,
       author: {
         '@type': 'Person',
-        name: post.authorName || 'Anonymous',
+        name: displayAuthorName,
       },
       publisher: {
         '@type': 'Organization',
@@ -405,10 +413,10 @@ export default function BlogPostPageClient({ slug, initialPost }) {
               <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                    <Avatar className="h-6 w-6">
-                    <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
-                    <AvatarFallback>{getInitials(post.authorName)}</AvatarFallback>
+                    <AvatarImage src={post.authorPhotoURL} alt={displayAuthorName} />
+                    <AvatarFallback>{getInitials(displayAuthorName)}</AvatarFallback>
                   </Avatar>
-                  <span>{post.authorName || 'Anonymous'}</span>
+                  <span>{displayAuthorName}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />

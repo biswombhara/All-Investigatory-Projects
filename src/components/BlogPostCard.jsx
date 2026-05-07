@@ -8,14 +8,24 @@ import { Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar.jsx';
 
+const ADMIN_EMAIL = 'allinvestigatoryprojects@gmail.com';
+
 const getInitials = (name) => {
     if (!name) return '';
     const names = name.split(' ');
     return names.map((n) => n[0]).join('');
 };
 
+const getDisplayAuthorName = (post) => {
+  if (post.authorEmail === ADMIN_EMAIL || post.authorName === 'All Investigatory Projects' || post.authorName === 'All_Investigatory Projects') {
+    return 'Admin';
+  }
+  return post.authorName || 'Anonymous';
+};
+
 export function BlogPostCard({ post }) {
   const postDate = post.createdAt?.toDate ? format(post.createdAt.toDate(), 'PPP') : 'Just now';
+  const displayAuthorName = getDisplayAuthorName(post);
 
   return (
     <Link href={`/blogs/${post.slug}`}>
@@ -35,11 +45,11 @@ export function BlogPostCard({ post }) {
           <div className="mt-4 flex items-center justify-between gap-3 text-sm text-muted-foreground pt-4 border-t">
             <div className="flex items-center gap-3">
                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={post.authorPhotoURL} alt={post.authorName} />
-                    <AvatarFallback>{getInitials(post.authorName)}</AvatarFallback>
+                    <AvatarImage src={post.authorPhotoURL} alt={displayAuthorName} />
+                    <AvatarFallback>{getInitials(displayAuthorName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                    <p className="font-semibold">{post.authorName}</p>
+                    <p className="font-semibold">{displayAuthorName}</p>
                     <p>{postDate}</p>
                 </div>
             </div>
